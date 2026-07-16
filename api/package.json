@@ -1,0 +1,16 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "AI Resume Generator API",
+  "main": "analyze.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "openai": "^4.0.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
