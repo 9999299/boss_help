@@ -31,8 +31,18 @@ export async function analyzeJob(jobData) {
  * @param {Object} resume - 简历数据
  */
 export async function saveResume(resume) {
-  return new Promise((resolve) => {
-    chrome.storage.local.set({ resume }, resolve);
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.local.set({ resume }, () => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+        } else {
+          resolve();
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 
@@ -41,9 +51,17 @@ export async function saveResume(resume) {
  * @returns {Object} 简历数据
  */
 export async function loadResume() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(['resume'], (result) => {
-      resolve(result.resume || null);
-    });
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.local.get(['resume'], (result) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+        } else {
+          resolve(result.resume || null);
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 }

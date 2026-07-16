@@ -41,7 +41,11 @@ const ExportPanel = ({ resumeData }) => {
 
       <div className="export-preview">
         <h4>预览</h4>
-        <pre>{JSON.stringify(resumeData, null, 2)}</pre>
+        {resumeData ? (
+          <pre>{JSON.stringify(resumeData, null, 2)}</pre>
+        ) : (
+          <p>暂无简历数据，请先在编辑器中填写简历信息。</p>
+        )}
       </div>
     </div>
   );
