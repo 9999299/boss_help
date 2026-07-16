@@ -30,8 +30,24 @@ describe('Content script', () => {
   });
 
   test('extractPageContent returns correct structure', () => {
-    // We need to test the extractPageContent function, but it's not exported.
-    // For now, we just verify the listener is registered.
-    expect(true).toBe(true);
+    // Capture the listener function passed to addListener
+    const listenerCallback = chrome.runtime.onMessage.addListener.mock.calls[0][0];
+    
+    // Create mock request, sender, and sendResponse
+    const mockRequest = { action: 'extractContent' };
+    const mockSender = {};
+    const mockSendResponse = jest.fn();
+    
+    // Call the listener
+    listenerCallback(mockRequest, mockSender, mockSendResponse);
+    
+    // Verify sendResponse was called with correct structure
+    expect(mockSendResponse).toHaveBeenCalledWith({
+      content: {
+        title: 'Test Title',
+        url: 'https://example.com',
+        text: 'Test content'
+      }
+    });
   });
 });
