@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const JobAnalyzer = ({ onAnalyze, isLoading }) => {
   const [jobData, setJobData] = useState({
@@ -9,8 +9,13 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
 
   const handleExtractFromPage = async () => {
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      const response = await chrome.tabs.sendMessage(tab.id, { action: 'extractContent' });
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        action: 'extractContent',
+      });
 
       if (response && response.content) {
         setJobData(response.content);
@@ -43,7 +48,9 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
           <label>职位描述：</label>
           <textarea
             value={jobData.jobDescription}
-            onChange={(e) => setJobData({ ...jobData, jobDescription: e.target.value })}
+            onChange={(e) =>
+              setJobData({ ...jobData, jobDescription: e.target.value })
+            }
             placeholder="粘贴职位描述..."
             rows={6}
           />
@@ -69,7 +76,9 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
           <input
             type="text"
             value={jobData.experience}
-            onChange={(e) => setJobData({ ...jobData, experience: e.target.value })}
+            onChange={(e) =>
+              setJobData({ ...jobData, experience: e.target.value })
+            }
             placeholder="3年以上开发经验"
           />
         </div>

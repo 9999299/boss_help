@@ -1,4 +1,5 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://your-vercel-app.vercel.app';
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || 'https://your-vercel-app.vercel.app';
 
 /**
  * 分析职位要求

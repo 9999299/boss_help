@@ -1,6 +1,10 @@
 require('@testing-library/jest-dom');
-const React = require('react');
-const { render, screen, fireEvent, waitFor } = require('@testing-library/react');
+const {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} = require('@testing-library/react');
 const Sidebar = require('../sidebar/Sidebar').default;
 
 // Mock chrome API
@@ -28,7 +32,8 @@ global.chrome = {
 // Mock fetch
 global.fetch = jest.fn().mockResolvedValue({
   ok: true,
-  json: () => Promise.resolve({ position: 'test', skillMatch: { matched: [] } }),
+  json: () =>
+    Promise.resolve({ position: 'test', skillMatch: { matched: [] } }),
 });
 
 // Mock alert
@@ -47,7 +52,9 @@ describe('Sidebar', () => {
   test('显示三个标签页', () => {
     render(<Sidebar />);
     expect(screen.getAllByText('职位分析').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByRole('button', { name: '简历编辑' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '简历编辑' })
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '导出' })).toBeInTheDocument();
   });
 
@@ -84,7 +91,12 @@ describe('Sidebar', () => {
 
   test('加载已保存的简历', async () => {
     const savedResume = {
-      personalInfo: { name: '张三', email: 'test@test.com', phone: '123', summary: 'test' },
+      personalInfo: {
+        name: '张三',
+        email: 'test@test.com',
+        phone: '123',
+        summary: 'test',
+      },
       skills: ['React'],
     };
 

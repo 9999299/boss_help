@@ -1,9 +1,8 @@
-import React from 'react';
-
 const ExportPanel = ({ resumeData }) => {
   const exportAsJSON = () => {
     const dataStr = JSON.stringify(resumeData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const dataUri =
+      'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
 
     const exportFileDefaultName = 'resume.json';
 

@@ -1,8 +1,13 @@
-const { extractJobDescription, extractSkills, extractExperience } = require('../utils/extractor');
+const {
+  extractJobDescription,
+  extractSkills,
+  extractExperience,
+} = require('../utils/extractor');
 
 // Mock DOMParser for Node.js environment
 class MockDOMParser {
-  parseFromString(html, _mimeType) { // eslint-disable-line no-unused-vars
+  parseFromString(html, _mimeType) {
+    // eslint-disable-line no-unused-vars
     // Simple HTML parser for testing
     const doc = {
       querySelector: (selector) => {
@@ -12,7 +17,9 @@ class MockDOMParser {
           const regex = new RegExp(`class="${className}"`, 'i');
           if (regex.test(html)) {
             // Extract content between the class tags (including nested content)
-            const match = html.match(new RegExp(`class="${className}"[^>]*>([\\s\\S]*?)</div>`, 'i'));
+            const match = html.match(
+              new RegExp(`class="${className}"[^>]*>([\\s\\S]*?)</div>`, 'i')
+            );
             if (match) {
               // Remove HTML tags and return text content
               const textContent = match[1].replace(/<[^>]*>/g, ' ').trim();
@@ -23,8 +30,8 @@ class MockDOMParser {
         return null;
       },
       body: {
-        textContent: html.replace(/<[^>]*>/g, ' ').trim()
-      }
+        textContent: html.replace(/<[^>]*>/g, ' ').trim(),
+      },
     };
     return doc;
   }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import JobAnalyzer from './components/JobAnalyzer';
 import ResumeEditor from './components/ResumeEditor';
 import ExportPanel from './components/ExportPanel';
@@ -45,7 +45,10 @@ const Sidebar = () => {
         phone: '',
         summary: `寻求${analysis.position}职位，具备${jobData.experience}经验。`,
       },
-      skills: [...(analysis.skillMatch?.matched || []), ...(jobData.skills || [])],
+      skills: [
+        ...(analysis.skillMatch?.matched || []),
+        ...(jobData.skills || []),
+      ],
       experience: [],
       education: [],
     };

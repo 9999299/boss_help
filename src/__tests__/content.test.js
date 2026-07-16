@@ -11,7 +11,7 @@ global.chrome = {
 global.document = {
   title: 'Test Title',
   documentElement: {
-    outerHTML: '<html><body>Test content</body></html>'
+    outerHTML: '<html><body>Test content</body></html>',
   },
   body: {
     innerText: 'Test content',
@@ -26,12 +26,13 @@ global.window = {
 
 // Mock DOMParser for Node.js environment
 class MockDOMParser {
-  parseFromString(html, _mimeType) { // eslint-disable-line no-unused-vars
+  parseFromString(html, _mimeType) {
+    // eslint-disable-line no-unused-vars
     return {
       querySelector: () => null,
       body: {
-        textContent: html.replace(/<[^>]*>/g, ' ').trim()
-      }
+        textContent: html.replace(/<[^>]*>/g, ' ').trim(),
+      },
     };
   }
 }
@@ -48,16 +49,17 @@ describe('Content script', () => {
 
   test('extractPageContent returns correct structure', () => {
     // Capture the listener function passed to addListener
-    const listenerCallback = chrome.runtime.onMessage.addListener.mock.calls[0][0];
-    
+    const listenerCallback =
+      chrome.runtime.onMessage.addListener.mock.calls[0][0];
+
     // Create mock request, sender, and sendResponse
     const mockRequest = { action: 'extractContent' };
     const mockSender = {};
     const mockSendResponse = jest.fn();
-    
+
     // Call the listener
     listenerCallback(mockRequest, mockSender, mockSendResponse);
-    
+
     // Verify sendResponse was called with correct structure
     expect(mockSendResponse).toHaveBeenCalledWith({
       content: {
@@ -66,8 +68,8 @@ describe('Content script', () => {
         jobDescription: expect.any(String),
         skills: expect.any(Array),
         experience: expect.any(String),
-        fullText: 'Test content'
-      }
+        fullText: 'Test content',
+      },
     });
   });
 });

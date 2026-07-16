@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const ResumeEditor = ({ initialData, onSave }) => {
   const [resumeData, setResumeData] = useState({
@@ -73,7 +73,9 @@ const ResumeEditor = ({ initialData, onSave }) => {
               {skill}
               <button
                 onClick={() => {
-                  const newSkills = resumeData.skills.filter((_, i) => i !== index);
+                  const newSkills = resumeData.skills.filter(
+                    (_, i) => i !== index
+                  );
                   setResumeData({ ...resumeData, skills: newSkills });
                 }}
               >

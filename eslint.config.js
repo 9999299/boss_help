@@ -19,22 +19,23 @@ export default [
         }
       },
       globals: {
-        browser: true,
-        node: true,
-        jest: true,
         chrome: 'readonly',
         console: 'readonly',
         document: 'readonly',
         window: 'readonly',
         global: 'readonly',
         require: 'readonly',
+        process: 'readonly',
+        alert: 'readonly',
+        fetch: 'readonly',
         describe: 'readonly',
         test: 'readonly',
         expect: 'readonly',
         beforeEach: 'readonly',
         afterEach: 'readonly',
         beforeAll: 'readonly',
-        afterAll: 'readonly'
+        afterAll: 'readonly',
+        jest: 'readonly'
       }
     },
     rules: {
