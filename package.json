@@ -17,6 +17,20 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "jest": {
+    "testEnvironment": "jsdom",
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "json"
+    ],
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    },
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "<rootDir>/__mocks__/styleMock.js"
+    }
+  },
   "dependencies": {
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -26,6 +40,9 @@
     "@babel/core": "^8.0.1",
     "@babel/preset-env": "^8.0.2",
     "@babel/preset-react": "^8.0.1",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "babel-loader": "^10.1.1",
     "css-loader": "^7.1.4",
     "eslint": "^10.7.0",
@@ -33,6 +50,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "html-webpack-plugin": "^5.6.7",
     "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
     "prettier": "^3.9.5",
     "style-loader": "^4.0.0",
     "webpack": "^5.108.4",
