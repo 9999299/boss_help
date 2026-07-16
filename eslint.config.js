@@ -25,7 +25,16 @@ export default [
         chrome: 'readonly',
         console: 'readonly',
         document: 'readonly',
-        window: 'readonly'
+        window: 'readonly',
+        global: 'readonly',
+        require: 'readonly',
+        describe: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly'
       }
     },
     rules: {
