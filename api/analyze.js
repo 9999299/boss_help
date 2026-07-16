@@ -10,7 +10,13 @@ const openai = new OpenAI({
  * @returns {Object} 分析结果
  */
 async function analyzeJob(jobData) {
-  const { jobDescription, skills, experience } = jobData;
+  if (!jobData) {
+    throw new Error('Missing required field: jobData is required');
+  }
+
+  const jobDescription = jobData.jobDescription || '';
+  const skills = jobData.skills || [];
+  const experience = jobData.experience || '';
   
   const prompt = `
 你是一位专业的职业顾问。请分析以下职位描述，并生成针对性的简历建议。

@@ -38,6 +38,10 @@ function extractJobDescription(html) {
  * @returns {string[]} 技能列表
  */
 function extractSkills(text) {
+  if (!text || typeof text !== 'string') {
+    return [];
+  }
+
   const skillKeywords = [
     'React',
     'Vue',
@@ -80,6 +84,10 @@ function extractSkills(text) {
  * @returns {string} 经验要求描述
  */
 function extractExperience(text) {
+  if (!text || typeof text !== 'string') {
+    return '经验要求未明确';
+  }
+
   const experiencePatterns = [
     /(\d+)\s*年以上?.*?经验/g,
     /经验.*?(\d+)\s*年/g,
