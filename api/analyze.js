@@ -93,6 +93,9 @@ module.exports = async (req, res) => {
   }
   
   try {
+    if (!req.body || !req.body.jobData) {
+      return res.status(400).json({ error: 'Missing jobData in request body' });
+    }
     const { jobData } = req.body;
     const result = await analyzeJob(jobData);
     return res.status(200).json(result);
