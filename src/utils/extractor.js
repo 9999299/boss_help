@@ -1,3 +1,5 @@
+/* globals DOMParser, module, exports */
+
 /**
  * 提取职位描述
  * @param {string} html - 页面HTML内容
@@ -5,7 +7,7 @@
  */
 function extractJobDescription(html) {
   // 创建临时DOM元素解析HTML
-  const parser = new DOMParser(); // eslint-disable-line no-undef
+  const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   
   // 尝试常见职位描述容器选择器
@@ -76,7 +78,7 @@ function extractExperience(text) {
   return '经验要求未明确';
 }
 
-module.exports = { // eslint-disable-line no-undef
+module.exports = {
   extractJobDescription,
   extractSkills,
   extractExperience
