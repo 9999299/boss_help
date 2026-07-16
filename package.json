@@ -8,8 +8,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "start": "webpack serve --mode development",
-    "build": "webpack --mode production",
+    "start": "webpack serve --mode development --config webpack.config.cjs",
+    "build": "webpack --mode production --config webpack.config.cjs",
     "test": "jest",
     "lint": "eslint src/",
     "format": "prettier --write src/"
