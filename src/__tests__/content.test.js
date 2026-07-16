@@ -10,6 +10,9 @@ global.chrome = {
 // Mock document and window
 global.document = {
   title: 'Test Title',
+  documentElement: {
+    outerHTML: '<html><body>Test content</body></html>'
+  },
   body: {
     innerText: 'Test content',
   },
@@ -20,6 +23,20 @@ global.window = {
     href: 'https://example.com',
   },
 };
+
+// Mock DOMParser for Node.js environment
+class MockDOMParser {
+  parseFromString(html, _mimeType) { // eslint-disable-line no-unused-vars
+    return {
+      querySelector: () => null,
+      body: {
+        textContent: html.replace(/<[^>]*>/g, ' ').trim()
+      }
+    };
+  }
+}
+
+global.DOMParser = MockDOMParser;
 
 // Import the content script
 require('../content');
@@ -46,7 +63,10 @@ describe('Content script', () => {
       content: {
         title: 'Test Title',
         url: 'https://example.com',
-        text: 'Test content'
+        jobDescription: expect.any(String),
+        skills: expect.any(Array),
+        experience: expect.any(String),
+        fullText: 'Test content'
       }
     });
   });
