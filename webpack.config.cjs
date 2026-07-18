@@ -3,7 +3,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    sidebar: './src/sidebar/Sidebar.jsx',
+    sidebar: './src/index.jsx',
     content: './src/content.js',
     background: './src/background.js'
   },
