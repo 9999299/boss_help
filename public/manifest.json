@@ -3,7 +3,8 @@
   "name": "AI Resume Generator",
   "version": "1.0.0",
   "description": "通过AI识别职位要求并生成针对性简历",
-  "permissions": ["activeTab", "scripting", "sidePanel"],
+  "permissions": ["activeTab", "scripting", "sidePanel", "storage"],
+  "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "sidebar.html",
     "default_title": "AI Resume Generator"

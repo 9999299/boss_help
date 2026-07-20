@@ -6,8 +6,7 @@ const {
 
 // Mock DOMParser for Node.js environment
 class MockDOMParser {
-  parseFromString(html, _mimeType) {
-    // eslint-disable-line no-unused-vars
+  parseFromString(html) {
     // Simple HTML parser for testing
     const doc = {
       querySelector: (selector) => {

@@ -26,12 +26,13 @@ global.window = {
 
 // Mock DOMParser for Node.js environment
 class MockDOMParser {
-  parseFromString(html, _mimeType) {
-    // eslint-disable-line no-unused-vars
+  parseFromString(html) {
     return {
       querySelector: () => null,
+      querySelectorAll: () => [],
       body: {
         textContent: html.replace(/<[^>]*>/g, ' ').trim(),
+        innerText: html.replace(/<[^>]*>/g, ' ').trim(),
       },
     };
   }

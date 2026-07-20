@@ -154,6 +154,20 @@ body {
   font-size: 14px;
 }
 
+.project-item {
+  padding: 10px;
+  margin-bottom: 12px;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}
+
+.hint {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+}
+
 .export-options {
   display: flex;
   flex-direction: column;
@@ -190,19 +204,37 @@ body {
 }
 
 .analysis-result h4 {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-size: 14px;
   color: #333;
 }
 
-.analysis-result pre {
-  background: white;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 11px;
-  overflow: auto;
-  max-height: 200px;
-  white-space: pre-wrap;
-  word-break: break-all;
+.analysis-section {
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.analysis-section h5 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #555;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 4px;
+}
+
+.analysis-section p {
+  margin: 4px 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.analysis-section ul {
+  margin: 4px 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #333;
 }

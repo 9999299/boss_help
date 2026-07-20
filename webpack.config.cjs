@@ -1,4 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 
 module.exports = {
@@ -19,13 +21,13 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react']
+            presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'classic' }]]
           }
         }
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: [MiniCssExtractPlugin.loader, 'css-loader']
       }
     ]
   },
@@ -34,6 +36,14 @@ module.exports = {
       template: './public/sidebar.html',
       filename: 'sidebar.html',
       chunks: ['sidebar']
+    }),
+    new MiniCssExtractPlugin({
+      filename: '[name].css'
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'public/manifest.json', to: 'manifest.json' }
+      ]
     })
   ],
   resolve: {

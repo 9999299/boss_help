@@ -28,5 +28,9 @@ Thumbs.db
 # 测试
 coverage/
 
+# 配置文件（含 API key）
+src/config.js
+
 # Vercel
 .vercel/
+.vercel

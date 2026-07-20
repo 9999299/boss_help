@@ -1,7 +1,8 @@
 const OpenAI = require('openai');
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.AI_API_KEY || '',
+  baseURL: process.env.AI_BASE_URL || 'https://token-plan-cn.xiaomimimo.com/v1'
 });
 
 /**
@@ -52,7 +53,7 @@ ${experience}
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'mimo-v2.5',
       messages: [
         {
           role: 'system',
