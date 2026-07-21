@@ -79,6 +79,15 @@ const Sidebar = () => {
     }
   };
 
+  const handleSearchSimilar = (result) => {
+    const skills = result.extractedSkills || result.skillMatch?.matched || [];
+    const position = result.position || '';
+    // 构造 BOSS 直聘搜索关键词：职位 + 核心技能
+    const query = [position, ...skills.slice(0, 3)].filter(Boolean).join(' ');
+    const url = `https://www.zhipin.com/web/geek/job?query=${encodeURIComponent(query)}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <div className="sidebar-container">
       <div className="header">
@@ -128,6 +137,12 @@ const Sidebar = () => {
             {analysisResult.company && <p><strong>公司：</strong>{analysisResult.company}</p>}
             {analysisResult.department && <p><strong>部门：</strong>{analysisResult.department}</p>}
             {analysisResult.salaryRange && <p><strong>薪资：</strong>{analysisResult.salaryRange}</p>}
+            <button
+              className="btn btn-primary btn-search-similar"
+              onClick={() => handleSearchSimilar(analysisResult)}
+            >
+              查找类似岗位
+            </button>
           </div>
 
           {analysisResult.jobHighlights?.length > 0 && (

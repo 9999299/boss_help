@@ -1,7 +1,7 @@
-import {
+const {
   alignProjectsWithSkills,
   extractSkillsFromText,
-} from '../utils/api';
+} = require('../utils/api');
 
 describe('extractSkillsFromText', () => {
   test('extracts skills from JD text', () => {
@@ -21,7 +21,6 @@ describe('alignProjectsWithSkills', () => {
     expect(result.length).toBeGreaterThanOrEqual(2);
     expect(result.length).toBeLessThanOrEqual(3);
     const names = result.map((p) => p.name);
-    // 项目名不能完全相同
     expect(new Set(names).size).toBeGreaterThanOrEqual(2);
   });
 
@@ -30,7 +29,6 @@ describe('alignProjectsWithSkills', () => {
       'React', 'Vue', 'Go', 'MySQL', 'Docker', 'Redis',
     ]);
     const stacks = result.map((p) => p.techStack.sort().join(','));
-    // 至少两个项目的技能栈不完全相同
     expect(new Set(stacks).size).toBeGreaterThanOrEqual(2);
   });
 
@@ -49,7 +47,6 @@ describe('alignProjectsWithSkills', () => {
     const all = result.flatMap((p) => p.techStack.map((t) => t.toLowerCase()));
     expect(all).toContain('react');
     expect(all).toContain('go');
-    // 至少 2 个技能被覆盖
     const matched = ['react', 'vue', 'go', 'mysql', 'docker', 'redis', 'kafka'];
     expect(matched.filter((s) => all.includes(s)).length).toBeGreaterThanOrEqual(2);
   });

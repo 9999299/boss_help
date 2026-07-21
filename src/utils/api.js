@@ -1,15 +1,9 @@
 // AI API 配置（直接从前端调用）
-// 配置文件优先使用，未配置则使用默认值
-let AI_API_BASE = 'https://token-plan-cn.xiaomimimo.com/v1';
-let AI_API_KEY = '';
-
-try {
-  const config = await import('../config.js');
-  AI_API_BASE = config.AI_API_BASE || AI_API_BASE;
-  AI_API_KEY = config.AI_API_KEY || '';
-} catch {
-  // config.js 不存在时使用默认值
-}
+const AI_API_BASE = 'https://token-plan-cn.xiaomimimo.com/v1';
+// __API_KEY__ 由 webpack DefinePlugin 注入，来自 src/config.js
+// Jest 环境下为 undefined，使用 fallback
+// eslint-disable-next-line no-undef
+const AI_API_KEY = typeof __API_KEY__ !== 'undefined' ? __API_KEY__ : '';
 
 /**
  * 分析职位要求

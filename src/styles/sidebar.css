@@ -238,3 +238,9 @@ body {
   line-height: 1.6;
   color: #333;
 }
+
+.btn-search-similar {
+  margin-top: 8px;
+  font-size: 12px;
+  padding: 6px 12px;
+}

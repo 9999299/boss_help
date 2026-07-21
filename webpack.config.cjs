@@ -1,7 +1,19 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
 const path = require('path');
+const fs = require('fs');
+
+// 读取 src/config.js 中的 API key
+let apiKey = '';
+try {
+  const configContent = fs.readFileSync('./src/config.js', 'utf8');
+  const match = configContent.match(/AI_API_KEY\s*=\s*['"](.+?)['"]/);
+  if (match) apiKey = match[1];
+} catch {
+  // config.js 不存在时使用空值
+}
 
 module.exports = {
   entry: {
@@ -32,6 +44,9 @@ module.exports = {
     ]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      __API_KEY__: JSON.stringify(apiKey)
+    }),
     new HtmlWebpackPlugin({
       template: './public/sidebar.html',
       filename: 'sidebar.html',
