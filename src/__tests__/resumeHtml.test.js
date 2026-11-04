@@ -74,4 +74,110 @@ describe('buildResumeHtml', () => {
     expect(html).toContain('智能简历助手');
     expect(html).toContain('React');
   });
+
+  test('includes project achievements, candidate companies and strengths with status labels', () => {
+    const html = buildResumeHtml({
+      personalInfo: { name: '候选人', email: '', phone: '', summary: '' },
+      skills: [],
+      experience: [],
+      education: [],
+      projects: [
+        {
+          name: '订单平台',
+          role: '核心开发',
+          dates: '',
+          techStack: ['Java'],
+          description: '负责服务',
+          achievements: ['延迟降低 20%'],
+          userConfirmed: false,
+        },
+      ],
+      companyCandidates: [
+        {
+          company: '示例科技',
+          role: '后端工程师',
+          matchReason: '技术栈匹配',
+          suggestedResponsibilities: ['负责微服务'],
+          userConfirmed: false,
+        },
+      ],
+      strengths: [
+        {
+          title: '系统设计',
+          description: '能拆解复杂系统',
+          evidenceSuggestions: ['准备架构图'],
+          userConfirmed: false,
+        },
+      ],
+    });
+
+    expect(html).toContain('项目成果');
+    expect(html).toContain('延迟降低 20%');
+    expect(html).toContain('候选公司经历（待核实）');
+    expect(html).toContain('示例科技');
+    expect(html).toContain('个人优势（请按实际核实）');
+    expect(html).toContain('系统设计');
+  });
+
+  test('includes work years summary in the header', () => {
+    const html = buildResumeHtml({
+      personalInfo: { name: '赵六', email: '', phone: '', summary: '' },
+      skills: [],
+      experience: [],
+      experienceSummary: {
+        totalYears: '5年',
+        industryYears: '3年',
+        industry: '互联网',
+      },
+      education: [],
+    });
+
+    expect(html).toContain('总工作年限：5年');
+    expect(html).toContain('相关行业经验：3年（互联网）');
+  });
+
+  test('renders work history in reverse chronological order with responsibilities', () => {
+    const html = buildResumeHtml({
+      personalInfo: { name: '赵六', email: '', phone: '', summary: '' },
+      skills: [],
+      experience: [
+        {
+          company: '旧公司',
+          title: '初级工程师',
+          dates: '2018.07 - 2020.06',
+          responsibilities: ['维护老系统'],
+        },
+        {
+          company: '新公司',
+          title: '高级工程师',
+          dates: '2021.03 - 2023.06',
+          responsibilities: ['负责核心服务'],
+          achievements: ['QPS 提升 2 倍'],
+        },
+      ],
+      education: [],
+    });
+
+    expect(html).toContain('工作经历');
+    expect(html).toContain('主要职责');
+    expect(html).toContain('负责核心服务');
+    expect(html).toContain('工作成果');
+    expect(html).toContain('QPS 提升 2 倍');
+    expect(html.indexOf('新公司')).toBeLessThan(html.indexOf('旧公司'));
+  });
+
+  test('escapes work history fields', () => {
+    const html = buildResumeHtml({
+      personalInfo: { name: 'a', email: '', phone: '', summary: '' },
+      skills: [],
+      experience: [
+        { company: '<b>x</b>', responsibilities: ['<script>y</script>'] },
+      ],
+      education: [],
+    });
+
+    expect(html).not.toContain('<b>x</b>');
+    expect(html).not.toContain('<script>y</script>');
+    expect(html).toContain('&lt;b&gt;x&lt;/b&gt;');
+  });
 });

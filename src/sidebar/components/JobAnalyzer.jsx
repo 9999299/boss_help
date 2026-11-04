@@ -5,6 +5,9 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
     jobDescription: '',
     skills: [],
     experience: '',
+    pageUrl: '',
+    pageTitle: '',
+    companyHints: [],
   });
 
   const handleExtractFromPage = async () => {
@@ -24,7 +27,13 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
         target: { tabId: tab.id },
         func: () => {
           function extractJobDesc() {
-            const markers = ['【岗位职责】', '【岗位要求】', '岗位职责', '岗位要求', '职位描述'];
+            const markers = [
+              '【岗位职责】',
+              '【岗位要求】',
+              '岗位职责',
+              '岗位要求',
+              '职位描述',
+            ];
             const body = document.body.innerText || '';
 
             // 尝试从标记位置提取
@@ -34,7 +43,14 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
             }, -1);
 
             if (startIdx !== -1) {
-              const endMarkers = ['郎启旭', '今日活跃', '去App', '工作地址', '查看更多', '前往App'];
+              const endMarkers = [
+                '郎启旭',
+                '今日活跃',
+                '去App',
+                '工作地址',
+                '查看更多',
+                '前往App',
+              ];
               let endIdx = body.length;
               for (const m of endMarkers) {
                 const i = body.indexOf(m, startIdx + 10);
@@ -54,20 +70,71 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
 
           function extractSkills(text) {
             const keywords = [
-              'React', 'Vue', 'Angular', 'Node.js', 'TypeScript', 'JavaScript',
-              'Python', 'Java', 'Go', 'Golang', 'Rust', 'C++', 'PHP',
-              'Docker', 'Kubernetes', 'K8s', 'AWS', 'MySQL', 'PostgreSQL',
-              'MongoDB', 'Redis', 'Elasticsearch', 'Git', 'Linux', 'Nginx',
-              'gRPC', 'REST', '微服务', '分布式', 'CI/CD', 'Jenkins',
-              '高并发', '高可用', '缓存', '消息队列', 'RabbitMQ', 'Kafka',
+              'React',
+              'Vue',
+              'Angular',
+              'Node.js',
+              'TypeScript',
+              'JavaScript',
+              'Python',
+              'Java',
+              'Go',
+              'Golang',
+              'Rust',
+              'C++',
+              'PHP',
+              'Docker',
+              'Kubernetes',
+              'K8s',
+              'AWS',
+              'MySQL',
+              'PostgreSQL',
+              'MongoDB',
+              'Redis',
+              'Elasticsearch',
+              'Git',
+              'Linux',
+              'Nginx',
+              'gRPC',
+              'REST',
+              '微服务',
+              '分布式',
+              'CI/CD',
+              'Jenkins',
+              '高并发',
+              '高可用',
+              '缓存',
+              '消息队列',
+              'RabbitMQ',
+              'Kafka',
             ];
             const lower = text.toLowerCase();
-            return keywords.filter(k => lower.includes(k.toLowerCase()));
+            return keywords.filter((k) => lower.includes(k.toLowerCase()));
           }
 
           function extractExp(text) {
-            const m = text.match(/(\d+)[\s-]*\d*\s*年/) || text.match(/(\d+)\s*年以上/);
+            const m =
+              text.match(/(\d+)[\s-]*\d*\s*年/) || text.match(/(\d+)\s*年以上/);
             return m ? m[1] + '年以上经验' : '经验要求未明确';
+          }
+
+          function extractCompanyHints() {
+            const selectors = [
+              '.company-info a',
+              '.sider-company a',
+              '[class*="company-name"]',
+              '[class*="companyName"]',
+            ];
+            const names = selectors.flatMap((selector) =>
+              Array.from(document.querySelectorAll(selector)).map((node) =>
+                (node.innerText || node.textContent || '')
+                  .replace(/\s+/g, ' ')
+                  .trim()
+              )
+            );
+            return [...new Set(names)]
+              .filter((name) => name.length >= 2 && name.length <= 60)
+              .slice(0, 10);
           }
 
           const text = document.body.innerText || '';
@@ -76,12 +143,18 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
             jobDescription: jobDesc,
             skills: extractSkills(text),
             experience: extractExp(text),
+            companyHints: extractCompanyHints(),
           };
         },
       });
 
       if (results && results[0] && results[0].result) {
-        setJobData(results[0].result);
+        setJobData({
+          ...results[0].result,
+          pageUrl: tab.url || '',
+          pageTitle: tab.title || '',
+          companyHints: results[0].result.companyHints || [],
+        });
       } else {
         alert('未能获取页面内容，请手动输入');
       }
@@ -107,6 +180,9 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
       >
         从页面提取
       </button>
+      <p className="privacy-hint">
+        点击分析后，职位页面文字将发送给 AI 服务处理；请先检查并删除敏感信息。
+      </p>
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -129,7 +205,10 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
             onChange={(e) =>
               setJobData({
                 ...jobData,
-                skills: e.target.value.split(',').map((s) => s.trim()),
+                skills: e.target.value
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
               })
             }
             placeholder="React, Vue, Node.js"
@@ -145,6 +224,24 @@ const JobAnalyzer = ({ onAnalyze, isLoading }) => {
               setJobData({ ...jobData, experience: e.target.value })
             }
             placeholder="3年以上开发经验"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>相关岗位公司（可选）：</label>
+          <input
+            type="text"
+            value={jobData.companyHints.join(', ')}
+            onChange={(e) =>
+              setJobData({
+                ...jobData,
+                companyHints: e.target.value
+                  .split(',')
+                  .map((company) => company.trim())
+                  .filter(Boolean),
+              })
+            }
+            placeholder="可粘贴 BOSS 相关岗位公司名，用逗号分隔"
           />
         </div>
 

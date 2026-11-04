@@ -1,7 +1,7 @@
 {
   "name": "chrome-resume-generator",
   "version": "1.0.0",
-  "description": "通过AI识别职位要求并生成针对性简历",
+  "description": "\u901a\u8fc7AI\u8bc6\u522b\u804c\u4f4d\u8981\u6c42\u5e76\u751f\u6210\u9488\u5bf9\u6027\u7b80\u5386",
   "type": "module",
   "main": "index.js",
   "directories": {
@@ -14,7 +14,11 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write src/",
-    "format:check": "prettier --check src/"
+    "format:check": "prettier --check src/",
+    "check:secrets": "node scripts/check-secrets.cjs",
+    "probe:api": "node scripts/probe-api.cjs",
+    "db:migrate": "node scripts/migrate.cjs",
+    "dev:api": "node --env-file-if-exists=.env scripts/dev-api.cjs"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +38,11 @@
     }
   },
   "dependencies": {
+    "@vercel/functions": "^3.10.6",
+    "mammoth": "^1.13.0",
+    "openai": "^4.104.0",
+    "pdf-parse": "^1.1.4",
+    "pg": "^8.23.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-scripts": "^5.0.1"

@@ -3,10 +3,17 @@
   "name": "AI Resume Generator",
   "version": "1.0.0",
   "description": "通过AI识别职位要求并生成针对性简历",
-  "permissions": ["activeTab", "scripting", "sidePanel", "storage"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "sidePanel",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.zhipin.com/*",
+    "https://*.zhipin.com/*"
+  ],
   "action": {
-    "default_popup": "sidebar.html",
     "default_title": "AI Resume Generator"
   },
   "side_panel": {
@@ -14,11 +21,5 @@
   },
   "background": {
     "service_worker": "background.js"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
-    }
-  ]
+  }
 }

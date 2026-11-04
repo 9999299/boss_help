@@ -1,3 +1,5 @@
+import { sortByDateDesc } from './resumeSchema.js';
+
 function escapeHtml(str) {
   return String(str ?? '')
     .replace(/&/g, '&amp;')
@@ -10,8 +12,11 @@ function escapeHtml(str) {
 export function buildResumeHtml(resumeData) {
   const info = resumeData?.personalInfo || {};
   const skills = resumeData?.skills || [];
-  const experience = resumeData?.experience || [];
+  const experienceSummary = resumeData?.experienceSummary || {};
+  const experience = sortByDateDesc(resumeData?.experience || []);
   const projects = resumeData?.projects || [];
+  const companyCandidates = resumeData?.companyCandidates || [];
+  const strengths = resumeData?.strengths || [];
   const education = resumeData?.education || [];
 
   const name = escapeHtml(info.name || '未命名');
@@ -20,6 +25,20 @@ export function buildResumeHtml(resumeData) {
   const summary = escapeHtml(info.summary || '');
 
   const contact = [email, phone].filter(Boolean).join(' · ');
+
+  const totalYears = escapeHtml(experienceSummary.totalYears || '');
+  const industryYears = escapeHtml(experienceSummary.industryYears || '');
+  const industry = escapeHtml(experienceSummary.industry || '');
+  const yearParts = [];
+  if (totalYears) yearParts.push(`总工作年限：${totalYears}`);
+  if (industryYears) {
+    yearParts.push(
+      `相关行业经验：${industryYears}${industry ? `（${industry}）` : ''}`
+    );
+  }
+  const yearsHtml = yearParts.length
+    ? `<div class="contact years">${yearParts.join(' · ')}</div>`
+    : '';
 
   const skillsHtml =
     skills.length > 0
@@ -37,8 +56,20 @@ export function buildResumeHtml(resumeData) {
             const title = escapeHtml(e.title || '');
             const company = escapeHtml(e.company || '');
             const dates = escapeHtml(e.dates || '');
+            const location = escapeHtml(e.location || '');
             const desc = escapeHtml(e.description || '');
-            return `<div class="item"><div class="item-head"><strong>${title}</strong> ${company ? `@ ${company}` : ''} <span class="dates">${dates}</span></div>${desc ? `<p>${desc}</p>` : ''}</div>`;
+            const responsibilities = (e.responsibilities || [])
+              .map(escapeHtml)
+              .filter(Boolean)
+              .map((responsibility) => `<li>${responsibility}</li>`)
+              .join('');
+            const achievements = (e.achievements || [])
+              .map(escapeHtml)
+              .filter(Boolean)
+              .map((achievement) => `<li>${achievement}</li>`)
+              .join('');
+            const status = e.userConfirmed ? '已核实' : '工作经历草稿 · 待核实';
+            return `<div class="item"><div class="item-head"><strong>${company || '未命名公司'}</strong>${title ? ` · ${title}` : ''} <span class="dates">${dates}</span></div><p class="evidence-label">${status}${location ? ` · ${location}` : ''}</p>${desc ? `<p>${desc}</p>` : ''}${responsibilities ? `<p class="tech">主要职责</p><ul>${responsibilities}</ul>` : ''}${achievements ? `<p class="tech">工作成果</p><ul>${achievements}</ul>` : ''}</div>`;
           })
           .join('')}</section>`
       : '';
@@ -52,7 +83,59 @@ export function buildResumeHtml(resumeData) {
             const dates = escapeHtml(p.dates || '');
             const tech = (p.techStack || []).map(escapeHtml).join(' · ');
             const desc = escapeHtml(p.description || '');
-            return `<div class="item"><div class="item-head"><strong>${pname}</strong> ${role ? `(${role})` : ''} <span class="dates">${dates}</span></div>${tech ? `<p class="tech">${tech}</p>` : ''}${desc ? `<p>${desc}</p>` : ''}</div>`;
+            const achievements = (p.achievements || [])
+              .map(escapeHtml)
+              .filter(Boolean)
+              .map((achievement) => `<li>${achievement}</li>`)
+              .join('');
+            const status = p.userConfirmed
+              ? '已核实'
+              : '示例项目 · 请按实际修改';
+            return `<div class="item"><div class="item-head"><strong>${pname}</strong> ${role ? `(${role})` : ''} <span class="dates">${dates}</span></div><p class="evidence-label">${status}</p>${tech ? `<p class="tech">${tech}</p>` : ''}${desc ? `<p>${desc}</p>` : ''}${achievements ? `<p class="tech">项目成果</p><ul>${achievements}</ul>` : ''}</div>`;
+          })
+          .join('')}</section>`
+      : '';
+
+  const companyCandidatesHtml =
+    companyCandidates.length > 0
+      ? `<section><h2>候选公司经历（待核实）</h2><p class="notice">以下公司仅为岗位匹配候选，不代表真实任职经历，请按实际情况核实。</p>${companyCandidates
+          .map((candidate) => {
+            const company = escapeHtml(candidate.company || '');
+            const role = escapeHtml(candidate.role || '');
+            const industry = escapeHtml(candidate.industry || '');
+            const location = escapeHtml(candidate.location || '');
+            const reason = escapeHtml(candidate.matchReason || '');
+            const responsibilities = (candidate.suggestedResponsibilities || [])
+              .map(escapeHtml)
+              .filter(Boolean)
+              .map((responsibility) => `<li>${responsibility}</li>`)
+              .join('');
+            const status = candidate.userConfirmed
+              ? '已核实'
+              : '候选公司 · 待核实';
+            return `<div class="item"><div class="item-head"><strong>${company}</strong> ${role ? `@ ${role}` : ''}<span class="dates">${location}</span></div><p class="evidence-label">${status}${industry ? ` · ${industry}` : ''}</p>${reason ? `<p>${reason}</p>` : ''}${responsibilities ? `<p class="tech">建议职责</p><ul>${responsibilities}</ul>` : ''}</div>`;
+          })
+          .join('')}</section>`
+      : '';
+
+  const strengthsHtml =
+    strengths.length > 0
+      ? `<section><h2>个人优势（请按实际核实）</h2>${strengths
+          .map((strength) => {
+            const title = escapeHtml(strength.title || '');
+            const description = escapeHtml(strength.description || '');
+            const suggestions = (strength.evidenceSuggestions || [])
+              .map(escapeHtml)
+              .filter(Boolean)
+              .map((suggestion) => `<li>${suggestion}</li>`)
+              .join('');
+            const keywords = (strength.keywords || [])
+              .map(escapeHtml)
+              .join(' · ');
+            const status = strength.userConfirmed
+              ? '已核实'
+              : '优势草稿 · 待核实';
+            return `<div class="item"><div class="item-head"><strong>${title}</strong></div><p class="evidence-label">${status}</p>${description ? `<p>${description}</p>` : ''}${keywords ? `<p class="tech">${keywords}</p>` : ''}${suggestions ? `<p class="tech">证据建议</p><ul>${suggestions}</ul>` : ''}</div>`;
           })
           .join('')}</section>`
       : '';
@@ -86,6 +169,7 @@ export function buildResumeHtml(resumeData) {
   }
   h1 { font-size: 28px; margin: 0 0 8px; }
   .contact { color: #444; margin-bottom: 20px; font-size: 14px; }
+  .years { margin-top: -14px; }
   h2 {
     font-size: 16px;
     border-bottom: 1px solid #ccc;
@@ -97,6 +181,8 @@ export function buildResumeHtml(resumeData) {
   .item-head { font-size: 14px; margin-bottom: 4px; overflow: hidden; }
   .dates { color: #666; float: right; font-weight: normal; }
   .tech { color: #555; font-size: 13px; }
+  .evidence-label, .notice { color: #8a5a00; font-size: 12px; }
+  ul { margin: 4px 0 8px 18px; padding: 0; font-size: 13px; line-height: 1.5; }
   @media print {
     body { padding: 0; max-width: none; }
     @page { margin: 14mm; }
@@ -106,10 +192,13 @@ export function buildResumeHtml(resumeData) {
 <body>
   <h1>${name}</h1>
   ${contact ? `<div class="contact">${contact}</div>` : ''}
+  ${yearsHtml}
   ${summaryHtml}
   ${skillsHtml}
-  ${projectsHtml}
   ${expHtml}
+  ${projectsHtml}
+  ${companyCandidatesHtml}
+  ${strengthsHtml}
   ${eduHtml}
 </body>
 </html>`;

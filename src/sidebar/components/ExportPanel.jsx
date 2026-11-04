@@ -7,13 +7,15 @@ const ExportPanel = ({ resumeData }) => {
     const info = data.personalInfo || {};
     return Boolean(
       info.name ||
-        info.summary ||
-        info.email ||
-        info.phone ||
-        (data.skills && data.skills.length) ||
-        (data.experience && data.experience.length) ||
-        (data.projects && data.projects.length) ||
-        (data.education && data.education.length)
+      info.summary ||
+      info.email ||
+      info.phone ||
+      (data.skills && data.skills.length) ||
+      (data.experience && data.experience.length) ||
+      (data.projects && data.projects.length) ||
+      (data.companyCandidates && data.companyCandidates.length) ||
+      (data.strengths && data.strengths.length) ||
+      (data.education && data.education.length)
     );
   };
 
@@ -71,10 +73,6 @@ const ExportPanel = ({ resumeData }) => {
     }
   };
 
-  const exportAsWord = async () => {
-    alert('Word导出功能开发中...');
-  };
-
   return (
     <div className="export-panel">
       <h3>导出简历</h3>
@@ -88,8 +86,13 @@ const ExportPanel = ({ resumeData }) => {
           导出为PDF
         </button>
 
-        <button className="btn btn-secondary" onClick={exportAsWord}>
-          导出为Word
+        <button
+          className="btn btn-secondary"
+          type="button"
+          disabled
+          title="Word 导出暂未支持"
+        >
+          导出为Word（暂未支持）
         </button>
       </div>
 

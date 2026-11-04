@@ -2,7 +2,9 @@
 console.log('Content script loaded');
 
 function isStyleOrScriptContent(text) {
-  return /(\{|\}|background:|color:|font-|margin:|padding:|border:|display:|position:)/i.test(text);
+  return /(\{|\}|background:|color:|font-|margin:|padding:|border:|display:|position:)/i.test(
+    text
+  );
 }
 
 function isNoiseText(text) {
@@ -20,9 +22,9 @@ function isNoiseText(text) {
     /求职工具升级/,
     /VIP尊享/,
     /去升级/,
-    /\.wXk.*?[A-Za-z]{3,}/,  // 随机字符串
+    /\.wXk.*?[A-Za-z]{3,}/, // 随机字符串
   ];
-  return noisePatterns.some(p => p.test(text));
+  return noisePatterns.some((p) => p.test(text));
 }
 
 function extractJobDescription(html) {
@@ -31,7 +33,14 @@ function extractJobDescription(html) {
 
   // 尝试直接获取 innerText（在真实 DOM 中比 html 解析更准确）
   // 通过标记符提取职位描述内容
-  const markers = ['【岗位职责】', '【岗位要求】', '岗位职责', '岗位要求', '职位描述', '工作内容'];
+  const markers = [
+    '【岗位职责】',
+    '【岗位要求】',
+    '岗位职责',
+    '岗位要求',
+    '职位描述',
+    '工作内容',
+  ];
 
   // 先尝试 BOSS 直聘专用选择器
   const bossSelectors = [
@@ -72,7 +81,7 @@ function extractJobDescription(html) {
       if (isNoiseText(text)) continue;
 
       // 检查是否包含职位描述标记
-      const hasMarker = markers.some(m => text.includes(m));
+      const hasMarker = markers.some((m) => text.includes(m));
       if (hasMarker || text.length > 100) {
         return text.replace(/\s+/g, ' ').trim();
       }
@@ -84,9 +93,10 @@ function extractJobDescription(html) {
   const cleanedBody = bodyText.replace(/\s+/g, ' ').trim();
 
   // 尝试找到岗位职责开始的位置
-  const startIdx = cleanedBody.indexOf('【岗位职责】') !== -1
-    ? cleanedBody.indexOf('【岗位职责】')
-    : cleanedBody.indexOf('岗位职责');
+  const startIdx =
+    cleanedBody.indexOf('【岗位职责】') !== -1
+      ? cleanedBody.indexOf('【岗位职责】')
+      : cleanedBody.indexOf('岗位职责');
 
   if (startIdx !== -1) {
     // 从岗位职责开始，截取到合适的位置
@@ -107,16 +117,58 @@ function extractJobDescription(html) {
 function extractSkills(text) {
   if (!text || typeof text !== 'string') return [];
   const skillKeywords = [
-    'React', 'Vue', 'Angular', 'Next.js', 'Nuxt.js',
-    'Node.js', 'TypeScript', 'JavaScript', 'HTML', 'CSS',
-    'Python', 'Java', 'Go', 'Golang', 'Rust', 'C++', 'C#', 'PHP',
-    'Docker', 'Kubernetes', 'K8s', 'AWS', 'Azure', 'GCP',
-    'SQL', 'MySQL', 'PostgreSQL', 'MongoDB', 'Redis', 'Elasticsearch',
-    'Git', 'Linux', 'Nginx', 'RabbitMQ', 'Kafka',
-    'gRPC', 'REST', 'GraphQL', '微服务', '分布式',
-    'CI/CD', 'Jenkins', 'GitLab',
-    'MySQL', 'Redis', 'MQ', 'RDB', 'NoSQL',
-    '高并发', '高可用', '缓存', '消息队列',
+    'React',
+    'Vue',
+    'Angular',
+    'Next.js',
+    'Nuxt.js',
+    'Node.js',
+    'TypeScript',
+    'JavaScript',
+    'HTML',
+    'CSS',
+    'Python',
+    'Java',
+    'Go',
+    'Golang',
+    'Rust',
+    'C++',
+    'C#',
+    'PHP',
+    'Docker',
+    'Kubernetes',
+    'K8s',
+    'AWS',
+    'Azure',
+    'GCP',
+    'SQL',
+    'MySQL',
+    'PostgreSQL',
+    'MongoDB',
+    'Redis',
+    'Elasticsearch',
+    'Git',
+    'Linux',
+    'Nginx',
+    'RabbitMQ',
+    'Kafka',
+    'gRPC',
+    'REST',
+    'GraphQL',
+    '微服务',
+    '分布式',
+    'CI/CD',
+    'Jenkins',
+    'GitLab',
+    'MySQL',
+    'Redis',
+    'MQ',
+    'RDB',
+    'NoSQL',
+    '高并发',
+    '高可用',
+    '缓存',
+    '消息队列',
   ];
   const found = [];
   const lowerText = text.toLowerCase();

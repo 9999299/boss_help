@@ -3,17 +3,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 const path = require('path');
-const fs = require('fs');
+const { buildManifest } = require('./scripts/manifest.cjs');
 
-// 读取 src/config.js 中的 API key
-let apiKey = '';
-try {
-  const configContent = fs.readFileSync('./src/config.js', 'utf8');
-  const match = configContent.match(/AI_API_KEY\s*=\s*['"](.+?)['"]/);
-  if (match) apiKey = match[1];
-} catch {
-  // config.js 不存在时使用空值
-}
+const analyzeApiUrl = process.env.ANALYZE_API_URL || 'http://localhost:3000';
 
 module.exports = {
   entry: {
@@ -23,7 +15,8 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js'
+    filename: '[name].js',
+    clean: true
   },
   module: {
     rules: [
@@ -45,7 +38,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      __API_KEY__: JSON.stringify(apiKey)
+      __ANALYZE_API_URL__: JSON.stringify(analyzeApiUrl)
     }),
     new HtmlWebpackPlugin({
       template: './public/sidebar.html',
@@ -57,7 +50,14 @@ module.exports = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'public/manifest.json', to: 'manifest.json' }
+        {
+          from: 'public/manifest.json',
+          to: 'manifest.json',
+          transform(content) {
+            const manifest = buildManifest(JSON.parse(content.toString()), analyzeApiUrl);
+            return JSON.stringify(manifest, null, 2);
+          }
+        }
       ]
     })
   ],

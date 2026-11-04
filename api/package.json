@@ -7,7 +7,11 @@
     "test": "jest"
   },
   "dependencies": {
-    "openai": "^4.0.0"
+    "@vercel/functions": "^3.10.6",
+    "mammoth": "^1.13.0",
+    "openai": "^4.104.0",
+    "pdf-parse": "^1.1.4",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "jest": "^29.0.0"
