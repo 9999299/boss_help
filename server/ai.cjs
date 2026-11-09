@@ -1,6 +1,17 @@
 const OpenAI = require('openai');
 
-const DEFAULT_TIMEOUT_MS = 20000;
+const DEFAULT_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 120000;
+
+function reasoningParams() {
+  const value = String(process.env.AI_REASONING || '').toLowerCase();
+  if (['off', 'none', 'false', 'disabled'].includes(value)) {
+    return { reasoning: { enabled: false } };
+  }
+  if (['low', 'medium', 'high'].includes(value)) {
+    return { reasoning: { effort: value } };
+  }
+  return {};
+}
 
 function createModelClient() {
   const apiKey = process.env.AI_API_KEY;
@@ -48,6 +59,7 @@ function createModelClient() {
         ],
         temperature: 0.25,
         max_tokens: maxTokens,
+        ...reasoningParams(),
       },
       requestOptions
     );

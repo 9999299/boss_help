@@ -3,7 +3,27 @@ const OpenAI = require('openai');
 const MAX_JOB_DESCRIPTION_LENGTH = 12000;
 const MAX_SKILLS = 100;
 const MAX_COMPANY_HINTS = 30;
-const REQUEST_TIMEOUT_MS = 30000;
+const REQUEST_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 180000;
+const MAX_OUTPUT_TOKENS =
+  Number(process.env.AI_ANALYZE_MAX_TOKENS) || 16000;
+
+function isTimeoutError(error) {
+  if (!error) return false;
+  if (error.name === 'AbortError') return true;
+  if (error.code === 'ETIMEDOUT') return true;
+  return /timed out|timeout|aborted|abort/i.test(String(error.message || ''));
+}
+
+function reasoningParams() {
+  const value = String(process.env.AI_REASONING || '').toLowerCase();
+  if (['off', 'none', 'false', 'disabled'].includes(value)) {
+    return { reasoning: { enabled: false } };
+  }
+  if (['low', 'medium', 'high'].includes(value)) {
+    return { reasoning: { effort: value } };
+  }
+  return {};
+}
 
 const openai = new OpenAI({
   apiKey: process.env.AI_API_KEY || '',
@@ -247,11 +267,14 @@ async function callModel(jobData, signal) {
         instructions:
           '你是严谨的职业顾问，只返回符合要求的 JSON，不要伪造用户的真实任职经历。',
         input: buildPrompt(jobData),
-        max_output_tokens: 8192,
+        max_output_tokens: MAX_OUTPUT_TOKENS,
       },
       requestOptions
     );
-    return responseOutputText(response);
+    return {
+      content: responseOutputText(response),
+      finishReason: response?.status,
+    };
   }
 
   const completion = await openai.chat.completions.create(
@@ -266,11 +289,16 @@ async function callModel(jobData, signal) {
         { role: 'user', content: buildPrompt(jobData) },
       ],
       temperature: 0.4,
-      max_tokens: 8192,
+      max_tokens: MAX_OUTPUT_TOKENS,
+      ...reasoningParams(),
     },
     requestOptions
   );
-  return completion?.choices?.[0]?.message?.content;
+  const choice = completion?.choices?.[0];
+  return {
+    content: choice?.message?.content,
+    finishReason: choice?.finish_reason,
+  };
 }
 
 /**
@@ -280,11 +308,29 @@ async function analyzeJob(jobData, options = {}) {
   validateJobData(jobData);
   const strict = options.strict === true;
   try {
-    const content = await callModel(jobData, options.signal);
-    return normalizeAnalysis(
-      parseModelContent(content),
-      jobData.companyHints || []
-    );
+    const output = await callModel(jobData, options.signal);
+    const content = typeof output === 'string' ? output : output?.content;
+    const finishReason =
+      typeof output === 'string' ? undefined : output?.finishReason;
+    if (finishReason && finishReason !== 'stop') {
+      console.error('[analyze] non-stop finish', {
+        finishReason,
+        contentLength: String(content || '').length,
+      });
+    }
+    let parsed;
+    try {
+      parsed = parseModelContent(content);
+    } catch (parseError) {
+      console.error('[analyze] model output invalid', {
+        finishReason,
+        contentLength: String(content || '').length,
+        head: String(content || '').slice(0, 300),
+        tail: String(content || '').slice(-800),
+      });
+      throw parseError;
+    }
+    return normalizeAnalysis(parsed, jobData.companyHints || []);
   } catch (error) {
     if (strict) throw error;
     return {
@@ -333,11 +379,25 @@ async function handler(req, res) {
     const result = await analyzeJob(jobData, { strict: true, signal: controller.signal });
     return res.status(200).json(result);
   } catch (error) {
+    console.error('[analyze] request failed', {
+      descriptionLength: String(jobData?.jobDescription || '').length,
+      skills: Array.isArray(jobData?.skills) ? jobData.skills.length : 0,
+      name: error?.name,
+      status: error?.status || error?.statusCode,
+      code: error?.code,
+      message: error?.message,
+    });
+    console.error(error);
     if (error?.status === 429 || error?.statusCode === 429) {
       return res.status(429).json({ error: 'AI service rate limit exceeded' });
     }
-    if (error?.name === 'AbortError' || error?.code === 'ETIMEDOUT') {
+    if (isTimeoutError(error)) {
       return res.status(504).json({ error: 'AI service timed out' });
+    }
+    if (error instanceof SyntaxError) {
+      return res
+        .status(502)
+        .json({ error: 'AI service returned invalid JSON, please retry' });
     }
     return res.status(502).json({ error: 'AI service failed' });
   } finally {

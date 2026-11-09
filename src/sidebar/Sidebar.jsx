@@ -173,6 +173,7 @@ const Sidebar = () => {
             library={careerLibrary}
             autoRunKey={customizeRunKey}
             onOpenLibrary={() => setActiveTab('library')}
+            onLibraryChange={handleCareerLibraryChange}
           />
         )}
 

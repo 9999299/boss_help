@@ -151,6 +151,7 @@ Authorization: Bearer <session-token>
 | GET/PUT | `/api/v1/career-library` | 读取/覆盖当前用户经历库 |
 | POST | `/api/v1/resume/parse` | 上传 PDF/DOCX 或文本并解析为经历草稿 |
 | POST | `/api/v1/jobs/:id/generate-experience` | 创建岗位定制生成任务 |
+| POST | `/api/v1/jobs/:id/example-projects` | 针对岗位缺口生成示例项目草稿（未核实） |
 | GET | `/api/v1/agent-runs/:id` | 查询任务状态与步骤进度 |
 | GET | `/api/v1/agent-runs/:id/result` | 获取任务结果 |
 | POST | `/api/v1/agent-runs/:id/cancel` | 取消任务 |
@@ -183,6 +184,7 @@ Authorization: Bearer <session-token>
 - 岗位 JD 提取：`server/agent/job.cjs` 的 `buildJobAnalysisPrompt`，要求只提取 JD 明确写出的要求，并把 JD 当作不可信文本。
 - 经历改写：`server/agent/writer.cjs` 的 `WRITER_SYSTEM_PROMPT` / `buildWriterPrompt`，强制只引用原始 evidence、不得新增事实、工作与项目不得互转。
 - 单条重写：`server/agent/writer.cjs` 的 `buildRegeneratePrompt`，只允许基于目标经历和用户反馈改写一条 bullet。
+- 示例项目：`server/agent/example-projects.cjs` 的 `buildExampleProjectsPrompt`，只针对岗位缺口生成草稿，强制标记为未核实的示例内容，不得声称真实任职。
 - 简历解析：`server/agent/resume.cjs` 的 `buildPrompt`，只提取原文事实，不猜测。
 - 所有提示词均在服务端，模型密钥和系统提示词不会下发到扩展。
 

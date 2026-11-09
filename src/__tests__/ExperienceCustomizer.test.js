@@ -11,6 +11,7 @@ const api = require('../utils/experienceApi');
 
 jest.mock('../utils/experienceApi', () => ({
   createExperienceGeneration: jest.fn(),
+  generateExampleProjects: jest.fn(),
   getAgentRun: jest.fn(),
   getAgentRunResult: jest.fn(),
   getExperienceGeneration: jest.fn(),
@@ -180,5 +181,19 @@ describe('ExperienceCustomizer', () => {
       expect(api.listExperienceGenerations).toHaveBeenCalledWith('job_1');
     });
     expect(screen.getByText(/v0 · 已修改/)).toBeInTheDocument();
+  });
+
+  test('岗位定制页展示示例项目生成入口', () => {
+    render(
+      <ExperienceCustomizer
+        jobData={jobData}
+        analysisResult={analysisResult}
+        library={library}
+        onOpenLibrary={jest.fn()}
+        onLibraryChange={jest.fn()}
+      />
+    );
+    expect(screen.getByText('示例项目')).toBeInTheDocument();
+    expect(screen.getByText('生成示例项目')).toBeInTheDocument();
   });
 });

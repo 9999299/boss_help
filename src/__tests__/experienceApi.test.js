@@ -1,6 +1,7 @@
 import {
   createExperienceGeneration,
   ensureSession,
+  generateExampleProjects,
   resetSessionForTests,
 } from '../utils/experienceApi';
 
@@ -101,5 +102,41 @@ describe('经历生成 API 客户端', () => {
       skills: ['Go'],
     });
     expect(body.include_work_experiences).toBe(true);
+  });
+
+  test('生成示例项目请求包含岗位快照和分析结果', async () => {
+    fetch.mockImplementation(async (url) => {
+      if (String(url).includes('/session')) {
+        return jsonResponse({
+          token: 'signed-token',
+          userId: 'user_1',
+          tenantId: 'tenant_1',
+          expiresAt: Date.now() + 86400000,
+        });
+      }
+      return jsonResponse({ projects: [], missing_requirements: [] });
+    });
+
+    await generateExampleProjects({
+      jobData: {
+        jobDescription: '岗位职责：负责 AI 后端开发。任职要求：Go、RAG。',
+        skills: ['Go', 'RAG'],
+        pageTitle: 'AI 后端工程师',
+      },
+      analysisResult: {
+        position: 'AI 后端工程师',
+        coreRequirements: ['Go', 'RAG'],
+      },
+      maxProjects: 2,
+    });
+
+    const call = fetch.mock.calls.find(([url]) =>
+      String(url).includes('/example-projects')
+    );
+    expect(call[1].headers.Authorization).toBe('Bearer signed-token');
+    const body = JSON.parse(call[1].body);
+    expect(body.max_projects).toBe(2);
+    expect(body.job_snapshot.title).toBe('AI 后端工程师');
+    expect(body.job_analysis).toMatchObject({ position: 'AI 后端工程师' });
   });
 });

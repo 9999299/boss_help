@@ -846,4 +846,107 @@ describe('简历解析', () => {
     });
     expect(parsed.experiences[0].evidence.length).toBeGreaterThan(0);
   });
+
+  test('为较长简历申请足够的输出 token，避免 JSON 被截断', async () => {
+    let received;
+    const model = {
+      async completeText(options) {
+        received = options;
+        return JSON.stringify({
+          work_experiences: [],
+          project_experiences: [],
+          skills: [],
+        });
+      },
+    };
+    await parseResume({
+      model,
+      text: '某公司 后端工程师 2021.03-2023.06 负责订单服务与接口开发，使用 Go 和 PostgreSQL。',
+    });
+    expect(received.maxTokens).toBeGreaterThanOrEqual(16000);
+  });
+});
+
+describe('示例项目 API', () => {
+  test('按缺口生成示例项目，并强制未核实', async () => {
+    const repository = createMemoryRepository();
+    await repository.upsertCareerLibrary(
+      ctx,
+      normalizeCareerExperiences([
+        {
+          id: 'exp_go2',
+          kind: 'employment',
+          organization: '某公司',
+          title: 'Go 工程师',
+          userConfirmed: true,
+          data: { responsibilities: ['使用 Go 开发订单服务'] },
+        },
+      ])
+    );
+    const model = {
+      async completeText({ step }) {
+        if (step === 'example_projects') {
+          return JSON.stringify({
+            projects: [
+              {
+                name: 'RAG 知识库服务',
+                role: '核心开发',
+                techStack: ['RAG'],
+                description: '搭建检索增强问答',
+                responsibilities: ['实现检索'],
+                achievements: [],
+                coveredRequirements: ['RAG'],
+              },
+            ],
+          });
+        }
+        throw new Error(`unexpected step ${step}`);
+      },
+    };
+    const handler = createV1Handler({ repository, model });
+    const req = {
+      method: 'POST',
+      url: '/api/v1/jobs/current/example-projects',
+      query: { path: ['jobs', 'current', 'example-projects'] },
+      headers: { authorization: `Bearer ${createSessionToken(ctx)}` },
+      body: {
+        job_snapshot: {
+          description: '招聘 AI 后端工程师，要求 Go、RAG、Kubernetes。',
+          skills: ['Go', 'RAG', 'Kubernetes'],
+        },
+      },
+    };
+    const res = createResponse();
+    await handler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    const payload = res.json.mock.calls[0][0];
+    expect(payload.data.projects).toHaveLength(1);
+    expect(payload.data.projects[0]).toMatchObject({
+      source: 'model',
+      evidenceStatus: 'example',
+      userConfirmed: false,
+      coveredRequirements: ['RAG'],
+    });
+    expect(
+      payload.data.missing_requirements.map((item) => item.requirement)
+    ).toEqual(expect.arrayContaining(['RAG', 'Kubernetes']));
+  });
+
+  test('未认证时拒绝生成示例项目', async () => {
+    const handler = createV1Handler({
+      repository: createMemoryRepository(),
+      model: {},
+    });
+    const req = {
+      method: 'POST',
+      url: '/api/v1/jobs/current/example-projects',
+      query: { path: ['jobs', 'current', 'example-projects'] },
+      headers: {},
+      body: {},
+    };
+    const res = createResponse();
+    await handler(req, res);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
 });

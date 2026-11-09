@@ -15,6 +15,7 @@ import {
   retryAgentRun,
   updateExperienceGeneration,
 } from '../../utils/experienceApi';
+import ExampleProjectsSection from './ExampleProjectsSection';
 
 const DEFAULT_STEPS = [
   { key: 'jd_analysis', label: '正在分析岗位要求' },
@@ -77,6 +78,7 @@ const ExperienceCustomizer = ({
   library,
   autoRunKey,
   onOpenLibrary,
+  onLibraryChange,
 }) => {
   const normalizedLibrary = normalizeCareerLibrary(library);
   const canGenerate =
@@ -333,6 +335,13 @@ const ExperienceCustomizer = ({
       <p className="hint">
         只会使用经历库中已核实的真实经历；未匹配的岗位要求会明确标记，不会自动补写。
       </p>
+
+      <ExampleProjectsSection
+        jobData={jobData}
+        analysisResult={analysisResult}
+        library={normalizedLibrary}
+        onChange={onLibraryChange}
+      />
 
       {!runId && (
         <button

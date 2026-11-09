@@ -241,6 +241,24 @@ export async function confirmExperienceGeneration(generationId) {
   );
 }
 
+export async function generateExampleProjects({
+  jobData,
+  analysisResult,
+  library,
+  maxProjects = 3,
+}) {
+  if (library) await syncCareerLibrary(library);
+  return authenticatedRequest('/api/v1/jobs/current/example-projects', {
+    method: 'POST',
+    body: {
+      job_snapshot: jobSnapshotFrom({ jobData, analysisResult }),
+      job_analysis: analysisResult || undefined,
+      max_projects: maxProjects,
+    },
+    timeout: 180000,
+  });
+}
+
 export async function regenerateBullet({
   generationId,
   claimId,
@@ -279,7 +297,7 @@ export async function parseResume(file) {
   return authenticatedRequest('/api/v1/resume/parse', {
     method: 'POST',
     body: { filename: file.name, content_base64: contentBase64 },
-    timeout: 90000,
+    timeout: 180000,
   });
 }
 
@@ -287,7 +305,7 @@ export async function parseResumeText(text) {
   return authenticatedRequest('/api/v1/resume/parse', {
     method: 'POST',
     body: { text },
-    timeout: 90000,
+    timeout: 180000,
   });
 }
 

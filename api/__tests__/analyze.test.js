@@ -33,6 +33,7 @@ jest.mock('openai', () => {
   return mockOpenAI;
 });
 
+const handler = require('../analyze');
 const { analyzeJob } = require('../analyze');
 const OpenAI = require('openai');
 
@@ -60,6 +61,54 @@ describe('analyzeJob', () => {
 
   afterEach(() => {
     delete process.env.AI_API_MODE;
+    delete process.env.AI_REASONING;
+  });
+
+  test('分析客户端超时足够覆盖慢速推理模型', () => {
+    const config = OpenAI.mock.calls[0][0];
+    expect(config.timeout).toBeGreaterThanOrEqual(120000);
+  });
+
+  test('模型请求被中止时返回 504 超时', async () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockInstance.chat.completions.create.mockRejectedValue(
+      Object.assign(new Error('Request was aborted.'), { name: 'Error' })
+    );
+    const res = {
+      statusCode: 0,
+      body: null,
+      headers: {},
+      setHeader(key, value) {
+        this.headers[key] = value;
+      },
+      status(code) {
+        this.statusCode = code;
+        return this;
+      },
+      json(body) {
+        this.body = body;
+        return this;
+      },
+      end() {},
+    };
+    const req = {
+      method: 'POST',
+      headers: { origin: 'http://localhost:3000' },
+      body: {
+        jobData: { jobDescription: '前端开发工程师，负责React应用开发' },
+      },
+    };
+    await handler(req, res);
+    spy.mockRestore();
+    expect(res.statusCode).toBe(504);
+    expect(res.body).toEqual({ error: 'AI service timed out' });
+  });
+
+  test('AI_REASONING=off 时关闭推理以缩短耗时', async () => {
+    process.env.AI_REASONING = 'off';
+    await analyzeJob({ jobDescription: '前端开发工程师，负责React应用开发' });
+    const request = mockInstance.chat.completions.create.mock.calls[0][0];
+    expect(request.reasoning).toEqual({ enabled: false });
   });
 
   test('analyzeJob 分析职位描述并返回结构化数据', async () => {
