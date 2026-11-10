@@ -1,5 +1,6 @@
 import {
   normalizeAnalysisResult,
+  normalizeEducation,
   normalizeExperience,
   normalizeExperienceSummary,
   normalizeResume,
@@ -82,6 +83,34 @@ describe('resume schema v2', () => {
 
     expect(normalized.projects[0].userConfirmed).toBe(true);
     expect(normalized.projects[0].source).toBe('user');
+  });
+
+  test('规范化教育经历字段并按时间倒序', () => {
+    const normalized = normalizeResume({
+      education: [
+        {
+          school: '某大学',
+          major: '计算机科学',
+          degree: '本科',
+          dates: '2016.09 - 2020.06',
+        },
+        { school: '某中学', dates: '2013.09 - 2016.06' },
+      ],
+    });
+
+    expect(normalized.education[0]).toMatchObject({
+      school: '某大学',
+      major: '计算机科学',
+      degree: '本科',
+      dates: '2016.09 - 2020.06',
+      source: 'user',
+    });
+    expect(normalized.education[1]).toMatchObject({
+      school: '某中学',
+      major: '',
+      degree: '',
+    });
+    expect(normalizeEducation({}).source).toBe('user');
   });
 
   test('编辑证据条目时自动重置核实状态', () => {

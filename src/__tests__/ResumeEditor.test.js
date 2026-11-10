@@ -81,7 +81,7 @@ describe('ResumeEditor v2', () => {
     expect(saved.strengths[0].title).toBe('工程落地能力');
   });
 
-  test('可新增项目、候选公司和个人优势草稿', () => {
+  test('可新增项目草稿', () => {
     const onSave = jest.fn();
     render(
       <ResumeEditor
@@ -96,8 +96,6 @@ describe('ResumeEditor v2', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: '添加项目' }));
-    fireEvent.click(screen.getByRole('button', { name: '添加候选公司' }));
-    fireEvent.click(screen.getByRole('button', { name: '添加个人优势' }));
     fireEvent.click(screen.getByRole('button', { name: '保存简历' }));
 
     const saved = onSave.mock.calls[0][0];
@@ -105,14 +103,64 @@ describe('ResumeEditor v2', () => {
       source: 'user',
       userConfirmed: false,
     });
-    expect(saved.companyCandidates[0]).toMatchObject({
-      source: 'user',
-      userConfirmed: false,
+  });
+
+  test('可添加并保存教育经历', () => {
+    const onSave = jest.fn();
+    render(
+      <ResumeEditor
+        initialData={{ ...resume, education: [] }}
+        onSave={onSave}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '添加教育经历' }));
+    fireEvent.change(screen.getByPlaceholderText('学校名称'), {
+      target: { value: '某大学' },
     });
-    expect(saved.strengths[0]).toMatchObject({
-      source: 'user',
-      userConfirmed: false,
+    fireEvent.change(screen.getByPlaceholderText('专业'), {
+      target: { value: '计算机科学' },
     });
+    fireEvent.change(screen.getByPlaceholderText('学历（如 本科、硕士）'), {
+      target: { value: '本科' },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText('起止时间（如 2018.09 - 2022.06）'),
+      { target: { value: '2016.09 - 2020.06' } }
+    );
+    fireEvent.click(screen.getByRole('button', { name: '保存简历' }));
+
+    const saved = onSave.mock.calls[0][0];
+    expect(saved.education[0]).toMatchObject({
+      school: '某大学',
+      major: '计算机科学',
+      degree: '本科',
+      dates: '2016.09 - 2020.06',
+    });
+  });
+
+  test('添加教育经历时嵌入所选学历模版', () => {
+    const onSave = jest.fn();
+    render(
+      <ResumeEditor
+        initialData={{ ...resume, education: [] }}
+        onSave={onSave}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '添加教育经历' }));
+    fireEvent.click(screen.getByRole('button', { name: '保存简历' }));
+    expect(onSave.mock.calls[0][0].education[0].degree).toBe('本科');
+
+    fireEvent.change(screen.getByLabelText('学历模版'), {
+      target: { value: '硕士' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '添加教育经历' }));
+    fireEvent.click(screen.getByRole('button', { name: '保存简历' }));
+
+    expect(
+      onSave.mock.calls[1][0].education.map((item) => item.degree)
+    ).toEqual(['本科', '硕士']);
   });
 
   test('展示并编辑工作年限与工作经历，保存后保留职责与成果', () => {

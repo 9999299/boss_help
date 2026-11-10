@@ -4,19 +4,25 @@ jest.mock('openai', () => {
       chat: {
         completions: {
           create: jest.fn().mockResolvedValue({
-            choices: [{
-              message: {
-                content: JSON.stringify({
-                  position: '前端开发工程师',
-                  coreRequirements: ['React开发', 'JavaScript精通'],
-                  skillMatch: { matched: ['React'], missing: ['Vue'], suggestions: ['学习Vue'] },
-                  resumeTips: ['突出React项目'],
-                  interviewPrep: ['准备React面试题']
-                })
-              }
-            }]
-          })
-        }
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    position: '前端开发工程师',
+                    coreRequirements: ['React开发', 'JavaScript精通'],
+                    skillMatch: {
+                      matched: ['React'],
+                      missing: ['Vue'],
+                      suggestions: ['学习Vue'],
+                    },
+                    resumeTips: ['突出React项目'],
+                    interviewPrep: ['准备React面试题'],
+                  }),
+                },
+              },
+            ],
+          }),
+        },
       },
       responses: {
         create: jest.fn().mockResolvedValue({
@@ -24,17 +30,17 @@ jest.mock('openai', () => {
             position: '后端开发工程师',
             projects: [],
             companyCandidates: [{ company: '示例科技', source: 'model' }],
-            strengths: [{ title: '系统设计能力' }]
-          })
-        })
-      }
+            strengths: [{ title: '系统设计能力' }],
+          }),
+        }),
+      },
     };
   });
   return mockOpenAI;
 });
 
 const handler = require('../analyze');
-const { analyzeJob } = require('../analyze');
+const { analyzeJob, buildPrompt } = require('../analyze');
 const OpenAI = require('openai');
 
 describe('analyzeJob', () => {
@@ -44,17 +50,23 @@ describe('analyzeJob', () => {
     // Get the instance used by analyzeJob (first constructor call)
     mockInstance = OpenAI.mock.results[0].value;
     mockInstance.chat.completions.create.mockReset().mockResolvedValue({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            position: '前端开发工程师',
-            coreRequirements: ['React开发', 'JavaScript精通'],
-            skillMatch: { matched: ['React'], missing: ['Vue'], suggestions: ['学习Vue'] },
-            resumeTips: ['突出React项目'],
-            interviewPrep: ['准备React面试题']
-          })
-        }
-      }]
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              position: '前端开发工程师',
+              coreRequirements: ['React开发', 'JavaScript精通'],
+              skillMatch: {
+                matched: ['React'],
+                missing: ['Vue'],
+                suggestions: ['学习Vue'],
+              },
+              resumeTips: ['突出React项目'],
+              interviewPrep: ['准备React面试题'],
+            }),
+          },
+        },
+      ],
     });
     mockInstance.responses.create.mockClear();
   });
@@ -62,6 +74,20 @@ describe('analyzeJob', () => {
   afterEach(() => {
     delete process.env.AI_API_MODE;
     delete process.env.AI_REASONING;
+  });
+
+  test('分析提示词只要求简历相关字段', () => {
+    const prompt = buildPrompt({
+      jobDescription: '负责 Go 后端开发，要求 RAG 经验。',
+      skills: ['Go', 'RAG'],
+      experience: '3年',
+    });
+    expect(prompt).not.toMatch(
+      /companyCandidates|strengths|interviewPrep|resumeTips|careerAdvice|jobHighlights/
+    );
+    expect(prompt).toContain('projects');
+    expect(prompt).toContain('experienceSummary');
+    expect(prompt).toContain('experience');
   });
 
   test('分析客户端超时足够覆盖慢速推理模型', () => {
@@ -115,11 +141,11 @@ describe('analyzeJob', () => {
     const jobData = {
       jobDescription: '前端开发工程师，负责React应用开发',
       skills: ['React', 'JavaScript'],
-      experience: '3年经验'
+      experience: '3年经验',
     };
-    
+
     const result = await analyzeJob(jobData);
-    
+
     expect(result).toHaveProperty('position');
     expect(result).toHaveProperty('coreRequirements');
     expect(result).toHaveProperty('skillMatch');
@@ -192,45 +218,53 @@ describe('analyzeJob', () => {
     const jobData = {
       jobDescription: '',
       skills: [],
-      experience: ''
+      experience: '',
     };
-    
+
     const result = await analyzeJob(jobData);
     expect(result).toHaveProperty('position');
   });
 
   test('analyzeJob 处理AI失败', async () => {
-    mockInstance.chat.completions.create.mockRejectedValue(new Error('API error'));
-    
+    mockInstance.chat.completions.create.mockRejectedValue(
+      new Error('API error')
+    );
+
     const jobData = {
       jobDescription: 'test',
       skills: ['test'],
-      experience: 'test'
+      experience: 'test',
     };
-    
+
     const result = await analyzeJob(jobData);
     expect(result).toHaveProperty('position', '未知职位');
     expect(result.coreRequirements).toContain('分析失败');
-    expect(result.skillMatch).toEqual({ matched: [], missing: [], suggestions: [] });
+    expect(result.skillMatch).toEqual({
+      matched: [],
+      missing: [],
+      suggestions: [],
+    });
     expect(result.resumeTips).toContain('请稍后重试');
     expect(result.interviewPrep).toContain('请稍后重试');
   });
 
   test('analyzeJob 处理无效JSON响应', async () => {
     mockInstance.chat.completions.create.mockResolvedValue({
-      choices: [{
-        message: {
-          content: 'Not valid JSON'
-        }
-      }]
+      choices: [
+        {
+          message: {
+            content: 'Not valid JSON',
+          },
+        },
+      ],
     });
-    
+
     const jobData = {
       jobDescription: 'test',
       skills: ['test'],
-      experience: 'test'
+      experience: 'test',
     };
-    
+
     const result = await analyzeJob(jobData);
     expect(result).toHaveProperty('position', '未知职位');
     expect(result.coreRequirements).toContain('分析失败');
@@ -366,7 +400,11 @@ describe('analyze API handler', () => {
     apiOpenAI.chat.completions.create.mockRejectedValueOnce(error);
 
     await handler(
-      { method: 'POST', body: { jobData: { jobDescription: '测试' } }, headers: {} },
+      {
+        method: 'POST',
+        body: { jobData: { jobDescription: '测试' } },
+        headers: {},
+      },
       response
     );
 

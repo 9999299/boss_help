@@ -17,7 +17,14 @@ describe('buildResumeHtml', () => {
         description: '负责前端',
       },
     ],
-    education: [{ school: '某大学', degree: '本科', dates: '2016-2020' }],
+    education: [
+      {
+        school: '某大学',
+        major: '计算机科学',
+        degree: '本科',
+        dates: '2016-2020',
+      },
+    ],
   };
 
   test('includes name and skills', () => {
@@ -25,6 +32,13 @@ describe('buildResumeHtml', () => {
     expect(html).toContain('张三');
     expect(html).toContain('React');
     expect(html).toContain('个人简介');
+  });
+
+  test('includes school, major and degree', () => {
+    const html = buildResumeHtml(sample);
+    expect(html).toContain('某大学');
+    expect(html).toContain('计算机科学 · 本科');
+    expect(html).toContain('2016-2020');
   });
 
   test('escapes HTML in user fields', () => {

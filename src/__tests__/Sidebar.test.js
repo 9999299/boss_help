@@ -112,17 +112,23 @@ describe('Sidebar', () => {
     });
   });
 
-  test('分析后把项目、候选公司和个人优势带入编辑器', async () => {
+  test('分析后停留在职位分析页并只展示简历草稿', async () => {
     fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         position: '后端工程师',
         skillMatch: { matched: ['Java'] },
+        jobHighlights: ['技术氛围好'],
         projects: [{ name: '订单平台', achievements: ['吞吐量提升'] }],
-        companyCandidates: [
-          { company: '示例科技', role: '后端工程师', source: 'page' },
+        experience: [
+          {
+            company: '某互联网公司',
+            title: '后端工程师',
+            dates: '2021.03 - 2023.06',
+          },
         ],
-        strengths: [{ title: '系统设计能力', description: '能拆解复杂系统' }],
+        companyCandidates: [{ company: '示例科技' }],
+        strengths: [{ title: '系统设计能力' }],
       }),
     });
     render(<Sidebar />);
@@ -133,18 +139,31 @@ describe('Sidebar', () => {
     fireEvent.click(screen.getByRole('button', { name: '分析职位' }));
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue('订单平台')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('示例科技')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('系统设计能力')).toBeInTheDocument();
+      expect(
+        screen.getByText('项目经历草稿（待核实，请按实际修改）')
+      ).toBeInTheDocument();
     });
+    expect(
+      screen.getByText('工作经历草稿（待核实，请按实际修改）')
+    ).toBeInTheDocument();
+    expect(screen.getByText('从页面提取')).toBeInTheDocument();
+    expect(screen.queryByText('岗位亮点')).not.toBeInTheDocument();
+    expect(screen.queryByText('技能匹配')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('候选公司（待核实，不代表真实任职）')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('个人优势草稿（请用事实核实）')
+    ).not.toBeInTheDocument();
   });
 
-  test('分析后把工作经历和工作年限带入编辑器', async () => {
+  test('确认生成后进入简历编辑并带入项目和经历', async () => {
     fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         position: '后端工程师',
         skillMatch: { matched: ['Java'] },
+        projects: [{ name: '订单平台', achievements: ['吞吐量提升'] }],
         experience: [
           {
             company: '某互联网公司',
@@ -162,8 +181,18 @@ describe('Sidebar', () => {
       target: { value: '负责 Java 微服务' },
     });
     fireEvent.click(screen.getByRole('button', { name: '分析职位' }));
+    fireEvent.click(await screen.findByRole('button', { name: '确认生成' }));
 
     await waitFor(() => {
+      expect(screen.getByText('简历编辑器')).toBeInTheDocument();
+      expect(
+        screen.getByText('已生成简历草稿，请核对后再使用')
+      ).toBeInTheDocument();
+      expect(screen.queryByText('岗位分析结果')).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: '确认生成' })
+      ).not.toBeInTheDocument();
+      expect(screen.getByDisplayValue('订单平台')).toBeInTheDocument();
       expect(screen.getByDisplayValue('某互联网公司')).toBeInTheDocument();
       expect(screen.getByDisplayValue('5年')).toBeInTheDocument();
       expect(screen.getByDisplayValue('负责核心服务')).toBeInTheDocument();

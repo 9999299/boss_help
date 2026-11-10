@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // eslint-disable-line no-unused-vars
+import React, { useState, useEffect, useRef } from 'react'; // eslint-disable-line no-unused-vars
 import JobAnalyzer from './components/JobAnalyzer';
 import ResumeEditor from './components/ResumeEditor';
 import ExportPanel from './components/ExportPanel';
@@ -18,6 +18,16 @@ const Sidebar = () => {
   const [jobData, setJobData] = useState(null);
   const [careerLibrary, setCareerLibrary] = useState(null);
   const [customizeRunKey, setCustomizeRunKey] = useState('');
+  const [editorNotice, setEditorNotice] = useState(false);
+  const noticeTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(noticeTimer.current), []);
+
+  useEffect(() => {
+    if (!editorNotice) return;
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [editorNotice]);
 
   useEffect(() => {
     loadResume().then((data) => {
@@ -37,11 +47,6 @@ const Sidebar = () => {
     try {
       const result = await analyzeJob(nextJobData);
       setAnalysisResult(result);
-
-      const draftResume = generateResumeDraft(result, nextJobData);
-      setResumeData(draftResume);
-
-      setActiveTab('editor');
     } catch (error) {
       console.error('分析失败:', error);
       setAnalysisError(error.message || '分析失败，请稍后重试');
@@ -71,10 +76,17 @@ const Sidebar = () => {
       experienceSummary: analysis.experienceSummary || {},
       experience: analysis.experience || [],
       projects: analysis.projects || [],
-      companyCandidates: analysis.companyCandidates || [],
-      strengths: analysis.strengths || [],
       education: [],
     });
+  };
+
+  const handleConfirmGenerate = () => {
+    if (!analysisResult) return;
+    setResumeData(generateResumeDraft(analysisResult, jobData || {}));
+    setActiveTab('editor');
+    setEditorNotice(true);
+    clearTimeout(noticeTimer.current);
+    noticeTimer.current = setTimeout(() => setEditorNotice(false), 2200);
   };
 
   const handleSaveResume = async (data) => {
@@ -178,13 +190,20 @@ const Sidebar = () => {
         )}
 
         {activeTab === 'editor' && (
-          <ResumeEditor initialData={resumeData} onSave={handleSaveResume} />
+          <div className="editor-transition">
+            {editorNotice && (
+              <div className="editor-notice" role="status">
+                已生成简历草稿，请核对后再使用
+              </div>
+            )}
+            <ResumeEditor initialData={resumeData} onSave={handleSaveResume} />
+          </div>
         )}
 
         {activeTab === 'export' && <ExportPanel resumeData={resumeData} />}
       </div>
 
-      {analysisResult && (
+      {analysisResult && activeTab === 'analyzer' && (
         <div className="analysis-result">
           <h4>岗位分析结果</h4>
 
@@ -252,84 +271,31 @@ const Sidebar = () => {
               </div>
             )}
 
-          {analysisResult.jobHighlights?.length > 0 && (
+          {analysisResult.projects?.length > 0 && (
             <div className="analysis-section">
-              <h5>岗位亮点</h5>
+              <h5>项目经历草稿（待核实，请按实际修改）</h5>
               <ul>
-                {analysisResult.jobHighlights.map((h, i) => (
-                  <li key={i}>{h}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {analysisResult.coreRequirements?.length > 0 && (
-            <div className="analysis-section">
-              <h5>核心要求</h5>
-              <ul>
-                {analysisResult.coreRequirements.map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {analysisResult.keyResponsibilities?.length > 0 && (
-            <div className="analysis-section">
-              <h5>主要职责</h5>
-              <ul>
-                {analysisResult.keyResponsibilities.map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {analysisResult.skillMatch && (
-            <div className="analysis-section">
-              <h5>技能匹配</h5>
-              {analysisResult.skillMatch.matched?.length > 0 && (
-                <p>
-                  <strong>已匹配：</strong>
-                  {analysisResult.skillMatch.matched.join('、')}
-                </p>
-              )}
-              {analysisResult.skillMatch.missing?.length > 0 && (
-                <p>
-                  <strong>缺失：</strong>
-                  {analysisResult.skillMatch.missing.join('、')}
-                </p>
-              )}
-              {analysisResult.skillMatch.suggestions?.length > 0 && (
-                <div>
-                  <strong>提升建议：</strong>
-                  <ul>
-                    {analysisResult.skillMatch.suggestions.map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          {analysisResult.resumeTips?.length > 0 && (
-            <div className="analysis-section">
-              <h5>简历优化建议</h5>
-              <ul>
-                {analysisResult.resumeTips.map((t, i) => (
-                  <li key={i}>{t}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {analysisResult.interviewPrep?.length > 0 && (
-            <div className="analysis-section">
-              <h5>面试准备</h5>
-              <ul>
-                {analysisResult.interviewPrep.map((t, i) => (
-                  <li key={i}>{t}</li>
+                {analysisResult.projects.map((project, i) => (
+                  <li key={i}>
+                    <strong>{project.name || '未命名项目'}</strong>
+                    {project.role ? ` · ${project.role}` : ''}
+                    {project.dates ? `（${project.dates}）` : ''}
+                    {project.description && <p>{project.description}</p>}
+                    {project.responsibilities?.length > 0 && (
+                      <ul>
+                        {project.responsibilities.map((item, j) => (
+                          <li key={j}>{item}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {project.achievements?.length > 0 && (
+                      <ul>
+                        {project.achievements.map((item, j) => (
+                          <li key={j}>{item}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -357,58 +323,15 @@ const Sidebar = () => {
             </div>
           )}
 
-          {analysisResult.companyCandidates?.length > 0 && (
-            <div className="analysis-section">
-              <h5>候选公司（待核实，不代表真实任职）</h5>
-              <ul>
-                {analysisResult.companyCandidates.map((candidate, i) => (
-                  <li key={i}>
-                    <strong>{candidate.company || '未命名公司'}</strong>
-                    {candidate.role ? ` · ${candidate.role}` : ''}
-                    {candidate.matchReason ? `：${candidate.matchReason}` : ''}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {analysisResult.strengths?.length > 0 && (
-            <div className="analysis-section">
-              <h5>个人优势草稿（请用事实核实）</h5>
-              <ul>
-                {analysisResult.strengths.map((strength, i) => (
-                  <li key={i}>
-                    <strong>{strength.title || '未命名优势'}</strong>
-                    {strength.description ? `：${strength.description}` : ''}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {analysisResult.careerAdvice && (
-            <div className="analysis-section">
-              <h5>职业发展</h5>
-              {analysisResult.careerAdvice.growthPath && (
-                <p>
-                  <strong>晋升路径：</strong>
-                  {analysisResult.careerAdvice.growthPath}
-                </p>
-              )}
-              {analysisResult.careerAdvice.industryTrend && (
-                <p>
-                  <strong>行业趋势：</strong>
-                  {analysisResult.careerAdvice.industryTrend}
-                </p>
-              )}
-              {analysisResult.careerAdvice.transferableSkills?.length > 0 && (
-                <p>
-                  <strong>可迁移技能：</strong>
-                  {analysisResult.careerAdvice.transferableSkills.join('、')}
-                </p>
-              )}
-            </div>
-          )}
+          <div className="analysis-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleConfirmGenerate}
+            >
+              确认生成
+            </button>
+          </div>
         </div>
       )}
     </div>

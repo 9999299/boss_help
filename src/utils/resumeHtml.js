@@ -145,9 +145,11 @@ export function buildResumeHtml(resumeData) {
       ? `<section><h2>教育经历</h2>${education
           .map((e) => {
             const school = escapeHtml(e.school || '');
+            const major = escapeHtml(e.major || '');
             const degree = escapeHtml(e.degree || '');
             const dates = escapeHtml(e.dates || '');
-            return `<div class="item"><div class="item-head"><strong>${school}</strong> ${degree} <span class="dates">${dates}</span></div></div>`;
+            const details = [major, degree].filter(Boolean).join(' · ');
+            return `<div class="item"><div class="item-head"><strong>${school}</strong> ${details} <span class="dates">${dates}</span></div></div>`;
           })
           .join('')}</section>`
       : '';

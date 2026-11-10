@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'; // eslint-disable-line no-unused-vars
 import {
   normalizeCompanyCandidate,
+  normalizeEducation,
   normalizeExperience,
   normalizeExperienceSummary,
   normalizeProject,
@@ -25,6 +26,7 @@ const EvidenceState = ({ item }) => (
 
 const ResumeEditor = ({ initialData, onSave }) => {
   const [resumeData, setResumeData] = useState(() => normalizeResume());
+  const [educationTemplate, setEducationTemplate] = useState('本科');
 
   useEffect(() => {
     setResumeData(normalizeResume(initialData || {}));
@@ -445,112 +447,83 @@ const ResumeEditor = ({ initialData, onSave }) => {
       </div>
 
       <div className="section">
-        <h4>候选公司经历（待核实，不代表真实任职）</h4>
-        {(resumeData.companyCandidates || []).length === 0 && (
-          <p className="hint">暂无候选公司，分析岗位后可自动生成。</p>
+        <h4>教育经历</h4>
+        <div className="form-group">
+          <label htmlFor="education-template">学历模版</label>
+          <select
+            id="education-template"
+            value={educationTemplate}
+            onChange={(e) => setEducationTemplate(e.target.value)}
+          >
+            <option value="大专">大专</option>
+            <option value="本科">本科</option>
+            <option value="硕士">硕士</option>
+            <option value="博士">博士</option>
+          </select>
+        </div>
+        {(resumeData.education || []).length === 0 && (
+          <p className="hint">暂无教育经历，点击下方按钮添加。</p>
         )}
-        {(resumeData.companyCandidates || []).map((candidate, index) => (
-          <div key={`company-${index}`} className="evidence-item company-item">
-            <EvidenceState item={candidate} />
+        {(resumeData.education || []).map((education, index) => (
+          <div key={`education-${index}`} className="evidence-item">
             <input
               type="text"
-              placeholder="候选公司"
-              value={candidate.company}
+              placeholder="学校名称"
+              value={education.school}
               onChange={(e) =>
                 updateItem(
-                  'companyCandidates',
+                  'education',
                   index,
-                  { company: e.target.value },
-                  normalizeCompanyCandidate
-                )
-              }
-            />
-            <input
-              type="text"
-              placeholder="岗位方向"
-              value={candidate.role}
-              onChange={(e) =>
-                updateItem(
-                  'companyCandidates',
-                  index,
-                  { role: e.target.value },
-                  normalizeCompanyCandidate
+                  { school: e.target.value },
+                  normalizeEducation
                 )
               }
             />
             <input
               type="text"
-              placeholder="行业"
-              value={candidate.industry}
+              placeholder="专业"
+              value={education.major}
               onChange={(e) =>
                 updateItem(
-                  'companyCandidates',
+                  'education',
                   index,
-                  { industry: e.target.value },
-                  normalizeCompanyCandidate
+                  { major: e.target.value },
+                  normalizeEducation
                 )
               }
             />
             <input
               type="text"
-              placeholder="地点"
-              value={candidate.location}
+              placeholder="学历（如 本科、硕士）"
+              value={education.degree}
               onChange={(e) =>
                 updateItem(
-                  'companyCandidates',
+                  'education',
                   index,
-                  { location: e.target.value },
-                  normalizeCompanyCandidate
+                  { degree: e.target.value },
+                  normalizeEducation
                 )
               }
             />
-            <textarea
-              placeholder="匹配理由"
-              value={candidate.matchReason}
-              rows={2}
+            <input
+              type="text"
+              placeholder="起止时间（如 2018.09 - 2022.06）"
+              value={education.dates}
               onChange={(e) =>
                 updateItem(
-                  'companyCandidates',
+                  'education',
                   index,
-                  { matchReason: e.target.value },
-                  normalizeCompanyCandidate
+                  { dates: e.target.value },
+                  normalizeEducation
                 )
               }
             />
-            <textarea
-              placeholder="建议职责（每行一条）"
-              value={candidate.suggestedResponsibilities.join('\n')}
-              rows={3}
-              onChange={(e) =>
-                updateItem(
-                  'companyCandidates',
-                  index,
-                  { suggestedResponsibilities: splitList(e.target.value) },
-                  normalizeCompanyCandidate
-                )
-              }
-            />
-            <label>
-              <input
-                type="checkbox"
-                checked={candidate.userConfirmed}
-                onChange={(e) =>
-                  updateItem(
-                    'companyCandidates',
-                    index,
-                    { userConfirmed: e.target.checked },
-                    normalizeCompanyCandidate
-                  )
-                }
-              />
-              我已按实际情况核实
-            </label>
             <button
               type="button"
               className="btn btn-danger"
-              onClick={() => removeItem('companyCandidates', index)}
+              onClick={() => removeItem('education', index)}
             >
-              删除候选公司
+              删除教育经历
             </button>
           </div>
         ))}
@@ -559,112 +532,249 @@ const ResumeEditor = ({ initialData, onSave }) => {
           className="btn btn-secondary"
           onClick={() =>
             addItem(
-              'companyCandidates',
-              normalizeCompanyCandidate({ source: 'user' }, 'user')
+              'education',
+              normalizeEducation({
+                source: 'user',
+                degree: educationTemplate,
+              })
             )
           }
         >
-          添加候选公司
+          添加教育经历
         </button>
       </div>
 
-      <div className="section">
-        <h4>个人优势（AI 草稿，请用事实支撑）</h4>
-        {(resumeData.strengths || []).length === 0 && (
-          <p className="hint">暂无个人优势，分析岗位后可自动生成。</p>
-        )}
-        {(resumeData.strengths || []).map((strength, index) => (
-          <div
-            key={`strength-${index}`}
-            className="evidence-item strength-item"
-          >
-            <EvidenceState item={strength} />
-            <input
-              type="text"
-              placeholder="优势标题"
-              value={strength.title}
-              onChange={(e) =>
-                updateItem(
-                  'strengths',
-                  index,
-                  { title: e.target.value },
-                  normalizeStrength
-                )
-              }
-            />
-            <textarea
-              placeholder="优势描述"
-              value={strength.description}
-              rows={3}
-              onChange={(e) =>
-                updateItem(
-                  'strengths',
-                  index,
-                  { description: e.target.value },
-                  normalizeStrength
-                )
-              }
-            />
-            <input
-              type="text"
-              placeholder="关键词（逗号分隔）"
-              value={strength.keywords.join(', ')}
-              onChange={(e) =>
-                updateItem(
-                  'strengths',
-                  index,
-                  { keywords: splitList(e.target.value) },
-                  normalizeStrength
-                )
-              }
-            />
-            <textarea
-              placeholder="证据建议（每行一条）"
-              value={strength.evidenceSuggestions.join('\n')}
-              rows={3}
-              onChange={(e) =>
-                updateItem(
-                  'strengths',
-                  index,
-                  { evidenceSuggestions: splitList(e.target.value) },
-                  normalizeStrength
-                )
-              }
-            />
-            <label>
+      {(resumeData.companyCandidates || []).length > 0 && (
+        <div className="section">
+          <h4>候选公司经历（待核实，不代表真实任职）</h4>
+          {(resumeData.companyCandidates || []).length === 0 && (
+            <p className="hint">暂无候选公司，分析岗位后可自动生成。</p>
+          )}
+          {(resumeData.companyCandidates || []).map((candidate, index) => (
+            <div
+              key={`company-${index}`}
+              className="evidence-item company-item"
+            >
+              <EvidenceState item={candidate} />
               <input
-                type="checkbox"
-                checked={strength.userConfirmed}
+                type="text"
+                placeholder="候选公司"
+                value={candidate.company}
+                onChange={(e) =>
+                  updateItem(
+                    'companyCandidates',
+                    index,
+                    { company: e.target.value },
+                    normalizeCompanyCandidate
+                  )
+                }
+              />
+              <input
+                type="text"
+                placeholder="岗位方向"
+                value={candidate.role}
+                onChange={(e) =>
+                  updateItem(
+                    'companyCandidates',
+                    index,
+                    { role: e.target.value },
+                    normalizeCompanyCandidate
+                  )
+                }
+              />
+              <input
+                type="text"
+                placeholder="行业"
+                value={candidate.industry}
+                onChange={(e) =>
+                  updateItem(
+                    'companyCandidates',
+                    index,
+                    { industry: e.target.value },
+                    normalizeCompanyCandidate
+                  )
+                }
+              />
+              <input
+                type="text"
+                placeholder="地点"
+                value={candidate.location}
+                onChange={(e) =>
+                  updateItem(
+                    'companyCandidates',
+                    index,
+                    { location: e.target.value },
+                    normalizeCompanyCandidate
+                  )
+                }
+              />
+              <textarea
+                placeholder="匹配理由"
+                value={candidate.matchReason}
+                rows={2}
+                onChange={(e) =>
+                  updateItem(
+                    'companyCandidates',
+                    index,
+                    { matchReason: e.target.value },
+                    normalizeCompanyCandidate
+                  )
+                }
+              />
+              <textarea
+                placeholder="建议职责（每行一条）"
+                value={candidate.suggestedResponsibilities.join('\n')}
+                rows={3}
+                onChange={(e) =>
+                  updateItem(
+                    'companyCandidates',
+                    index,
+                    { suggestedResponsibilities: splitList(e.target.value) },
+                    normalizeCompanyCandidate
+                  )
+                }
+              />
+              <label>
+                <input
+                  type="checkbox"
+                  checked={candidate.userConfirmed}
+                  onChange={(e) =>
+                    updateItem(
+                      'companyCandidates',
+                      index,
+                      { userConfirmed: e.target.checked },
+                      normalizeCompanyCandidate
+                    )
+                  }
+                />
+                我已按实际情况核实
+              </label>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => removeItem('companyCandidates', index)}
+              >
+                删除候选公司
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() =>
+              addItem(
+                'companyCandidates',
+                normalizeCompanyCandidate({ source: 'user' }, 'user')
+              )
+            }
+          >
+            添加候选公司
+          </button>
+        </div>
+      )}
+
+      {(resumeData.strengths || []).length > 0 && (
+        <div className="section">
+          <h4>个人优势（AI 草稿，请用事实支撑）</h4>
+          {(resumeData.strengths || []).length === 0 && (
+            <p className="hint">暂无个人优势，分析岗位后可自动生成。</p>
+          )}
+          {(resumeData.strengths || []).map((strength, index) => (
+            <div
+              key={`strength-${index}`}
+              className="evidence-item strength-item"
+            >
+              <EvidenceState item={strength} />
+              <input
+                type="text"
+                placeholder="优势标题"
+                value={strength.title}
                 onChange={(e) =>
                   updateItem(
                     'strengths',
                     index,
-                    { userConfirmed: e.target.checked },
+                    { title: e.target.value },
                     normalizeStrength
                   )
                 }
               />
-              我已按实际情况核实
-            </label>
-            <button
-              type="button"
-              className="btn btn-danger"
-              onClick={() => removeItem('strengths', index)}
-            >
-              删除个人优势
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={() =>
-            addItem('strengths', normalizeStrength({ source: 'user' }, 'user'))
-          }
-        >
-          添加个人优势
-        </button>
-      </div>
+              <textarea
+                placeholder="优势描述"
+                value={strength.description}
+                rows={3}
+                onChange={(e) =>
+                  updateItem(
+                    'strengths',
+                    index,
+                    { description: e.target.value },
+                    normalizeStrength
+                  )
+                }
+              />
+              <input
+                type="text"
+                placeholder="关键词（逗号分隔）"
+                value={strength.keywords.join(', ')}
+                onChange={(e) =>
+                  updateItem(
+                    'strengths',
+                    index,
+                    { keywords: splitList(e.target.value) },
+                    normalizeStrength
+                  )
+                }
+              />
+              <textarea
+                placeholder="证据建议（每行一条）"
+                value={strength.evidenceSuggestions.join('\n')}
+                rows={3}
+                onChange={(e) =>
+                  updateItem(
+                    'strengths',
+                    index,
+                    { evidenceSuggestions: splitList(e.target.value) },
+                    normalizeStrength
+                  )
+                }
+              />
+              <label>
+                <input
+                  type="checkbox"
+                  checked={strength.userConfirmed}
+                  onChange={(e) =>
+                    updateItem(
+                      'strengths',
+                      index,
+                      { userConfirmed: e.target.checked },
+                      normalizeStrength
+                    )
+                  }
+                />
+                我已按实际情况核实
+              </label>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => removeItem('strengths', index)}
+              >
+                删除个人优势
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() =>
+              addItem(
+                'strengths',
+                normalizeStrength({ source: 'user' }, 'user')
+              )
+            }
+          >
+            添加个人优势
+          </button>
+        </div>
+      )}
 
       <button type="button" className="btn btn-primary" onClick={handleSave}>
         保存简历

@@ -133,6 +133,18 @@ export function sortByDateDesc(list) {
     .map((entry) => entry.item);
 }
 
+export function normalizeEducation(item, source = 'user') {
+  const education = item && typeof item === 'object' ? item : {};
+  return {
+    ...education,
+    school: String(education.school || ''),
+    major: String(education.major || ''),
+    degree: String(education.degree || ''),
+    dates: String(education.dates || ''),
+    source: education.source || source,
+  };
+}
+
 export function normalizeAnalysisResult(result = {}) {
   const input = result && typeof result === 'object' ? result : {};
   return {
@@ -171,7 +183,11 @@ export function normalizeResume(resume = {}) {
         normalizeExperience(item, item?.source || 'user')
       )
     ),
-    education: asArray(input.education),
+    education: sortByDateDesc(
+      asArray(input.education).map((item) =>
+        normalizeEducation(item, item?.source || 'user')
+      )
+    ),
     projects: asArray(input.projects).map((item) =>
       normalizeProject(item, item?.source || 'user')
     ),
