@@ -756,3 +756,26 @@ body {
     animation: none;
   }
 }
+
+.save-error {
+  color: #c0392b;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.export-picker {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.export-picker p {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.export-picker .btn {
+  margin-right: 8px;
+}

@@ -1,8 +1,14 @@
 require('@testing-library/jest-dom');
 const { render, screen } = require('@testing-library/react');
+
+jest.mock('../utils/exportResume', () => ({
+  exportResumePdf: jest.fn(),
+  exportResumeDocx: jest.fn(),
+}));
+
 const ExportPanel = require('../sidebar/components/ExportPanel').default;
 
-test('Word 导出尚未实现时明确显示不可用', () => {
+test('Word 导出按钮可用', () => {
   render(
     <ExportPanel
       resumeData={{
@@ -13,7 +19,6 @@ test('Word 导出尚未实现时明确显示不可用', () => {
     />
   );
 
-  const button = screen.getByRole('button', { name: /Word/ });
-  expect(button).toBeDisabled();
-  expect(screen.getByText(/暂未支持/)).toBeInTheDocument();
+  const button = screen.getByRole('button', { name: '导出为Word' });
+  expect(button).toBeEnabled();
 });

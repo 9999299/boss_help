@@ -1,5 +1,12 @@
 require('@testing-library/jest-dom');
 const { render, screen, fireEvent } = require('@testing-library/react');
+
+jest.mock('../utils/exportResume', () => ({
+  exportResumePdf: jest.fn(),
+  exportResumeDocx: jest.fn(),
+}));
+
+const { exportResumePdf, exportResumeDocx } = require('../utils/exportResume');
 const ResumeEditor = require('../sidebar/components/ResumeEditor').default;
 
 const resume = {
@@ -234,5 +241,42 @@ describe('ResumeEditor v2', () => {
       responsibilities: [],
       achievements: [],
     });
+  });
+
+  test('保存成功后显示格式选择并可导出 PDF', async () => {
+    const onSave = jest.fn().mockResolvedValue(true);
+    render(<ResumeEditor initialData={resume} onSave={onSave} />);
+
+    fireEvent.click(screen.getByRole('button', { name: '保存简历' }));
+
+    expect(
+      await screen.findByText('已保存到本地，请选择导出格式')
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '导出 PDF' }));
+    expect(exportResumePdf).toHaveBeenCalledTimes(1);
+  });
+
+  test('保存成功后可选导出 Word', async () => {
+    const onSave = jest.fn().mockResolvedValue(true);
+    render(<ResumeEditor initialData={resume} onSave={onSave} />);
+
+    fireEvent.click(screen.getByRole('button', { name: '保存简历' }));
+    await screen.findByText('已保存到本地，请选择导出格式');
+    fireEvent.click(screen.getByRole('button', { name: '导出 Word' }));
+
+    expect(exportResumeDocx).toHaveBeenCalledTimes(1);
+  });
+
+  test('保存失败时显示错误且不显示格式选择', async () => {
+    const onSave = jest.fn().mockRejectedValue(new Error('存储不可用'));
+    render(<ResumeEditor initialData={resume} onSave={onSave} />);
+
+    fireEvent.click(screen.getByRole('button', { name: '保存简历' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('存储不可用');
+    expect(
+      screen.queryByText('已保存到本地，请选择导出格式')
+    ).not.toBeInTheDocument();
   });
 });

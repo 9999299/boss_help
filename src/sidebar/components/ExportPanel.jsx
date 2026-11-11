@@ -1,24 +1,10 @@
 import React from 'react'; // eslint-disable-line no-unused-vars
-import { buildResumeHtml } from '../../utils/resumeHtml';
+import {
+  exportResumePdf,
+  exportResumeDocx,
+} from '../../utils/exportResume';
 
 const ExportPanel = ({ resumeData }) => {
-  const hasResumeContent = (data) => {
-    if (!data) return false;
-    const info = data.personalInfo || {};
-    return Boolean(
-      info.name ||
-      info.summary ||
-      info.email ||
-      info.phone ||
-      (data.skills && data.skills.length) ||
-      (data.experience && data.experience.length) ||
-      (data.projects && data.projects.length) ||
-      (data.companyCandidates && data.companyCandidates.length) ||
-      (data.strengths && data.strengths.length) ||
-      (data.education && data.education.length)
-    );
-  };
-
   const exportAsJSON = () => {
     const dataStr = JSON.stringify(resumeData, null, 2);
     const dataUri =
@@ -32,47 +18,6 @@ const ExportPanel = ({ resumeData }) => {
     linkElement.click();
   };
 
-  const exportAsPDF = () => {
-    if (!hasResumeContent(resumeData)) {
-      alert('请先在编辑器中填写简历信息。');
-      return;
-    }
-
-    try {
-      const html = buildResumeHtml(resumeData);
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        alert('请允许弹窗后重试');
-        return;
-      }
-
-      printWindow.document.open();
-      printWindow.document.write(html);
-      printWindow.document.close();
-
-      const doPrint = () => {
-        printWindow.focus();
-        printWindow.print();
-        printWindow.onafterprint = () => {
-          try {
-            printWindow.close();
-          } catch {
-            /* ignore */
-          }
-        };
-      };
-
-      if (printWindow.document.readyState === 'complete') {
-        doPrint();
-      } else {
-        printWindow.onload = doPrint;
-      }
-    } catch (error) {
-      console.error('PDF导出失败:', error);
-      alert('PDF导出失败: ' + error.message);
-    }
-  };
-
   return (
     <div className="export-panel">
       <h3>导出简历</h3>
@@ -82,17 +27,19 @@ const ExportPanel = ({ resumeData }) => {
           导出为JSON
         </button>
 
-        <button className="btn btn-secondary" onClick={exportAsPDF}>
+        <button
+          className="btn btn-secondary"
+          onClick={() => exportResumePdf(resumeData)}
+        >
           导出为PDF
         </button>
 
         <button
           className="btn btn-secondary"
           type="button"
-          disabled
-          title="Word 导出暂未支持"
+          onClick={() => exportResumeDocx(resumeData)}
         >
-          导出为Word（暂未支持）
+          导出为Word
         </button>
       </div>
 

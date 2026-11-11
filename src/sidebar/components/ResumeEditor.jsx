@@ -9,6 +9,7 @@ import {
   normalizeStrength,
   updateEvidenceItem,
 } from '../../utils/resumeSchema';
+import { exportResumePdf, exportResumeDocx } from '../../utils/exportResume';
 
 const splitList = (value) =>
   String(value || '')
@@ -27,6 +28,9 @@ const EvidenceState = ({ item }) => (
 const ResumeEditor = ({ initialData, onSave }) => {
   const [resumeData, setResumeData] = useState(() => normalizeResume());
   const [educationTemplate, setEducationTemplate] = useState('本科');
+  const [saveState, setSaveState] = useState('idle');
+  const [saveError, setSaveError] = useState('');
+  const [showExportPicker, setShowExportPicker] = useState(false);
 
   useEffect(() => {
     setResumeData(normalizeResume(initialData || {}));
@@ -76,7 +80,34 @@ const ResumeEditor = ({ initialData, onSave }) => {
     }));
   };
 
-  const handleSave = () => onSave(normalizeResume(resumeData));
+  const handleSave = async () => {
+    setSaveError('');
+    setShowExportPicker(false);
+    setSaveState('saving');
+    try {
+      const result = onSave(normalizeResume(resumeData));
+      if (result && typeof result.then === 'function') {
+        await result;
+      }
+      setSaveState('saved');
+      setShowExportPicker(true);
+    } catch (error) {
+      setSaveState('error');
+      setSaveError(error.message || '保存失败');
+    }
+  };
+
+  const handleExport = async (format) => {
+    if (format === 'pdf') {
+      exportResumePdf(resumeData);
+    } else if (format === 'docx') {
+      const result = exportResumeDocx(resumeData);
+      if (result && typeof result.then === 'function') {
+        await result;
+      }
+    }
+    setShowExportPicker(false);
+  };
 
   return (
     <div className="resume-editor">
@@ -776,9 +807,47 @@ const ResumeEditor = ({ initialData, onSave }) => {
         </div>
       )}
 
-      <button type="button" className="btn btn-primary" onClick={handleSave}>
-        保存简历
+      <button
+        type="button"
+        className="btn btn-primary"
+        onClick={handleSave}
+        disabled={saveState === 'saving'}
+      >
+        {saveState === 'saving' ? '保存中...' : '保存简历'}
       </button>
+
+      {saveState === 'error' && (
+        <p className="save-error" role="alert">
+          {saveError}
+        </p>
+      )}
+
+      {showExportPicker && (
+        <div className="export-picker">
+          <p>已保存到本地，请选择导出格式</p>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => handleExport('pdf')}
+          >
+            导出 PDF
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => handleExport('docx')}
+          >
+            导出 Word
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setShowExportPicker(false)}
+          >
+            取消
+          </button>
+        </div>
+      )}
     </div>
   );
 };

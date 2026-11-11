@@ -25,6 +25,9 @@
   "license": "ISC",
   "jest": {
     "testEnvironment": "jsdom",
+    "setupFiles": [
+      "<rootDir>/jest.setup.js"
+    ],
     "moduleFileExtensions": [
       "js",
       "jsx",
@@ -39,6 +42,7 @@
   },
   "dependencies": {
     "@vercel/functions": "^3.10.6",
+    "docx": "^9.15.3",
     "mammoth": "^1.13.0",
     "openai": "^4.104.0",
     "pdf-parse": "^1.1.4",

@@ -90,14 +90,8 @@ const Sidebar = () => {
   };
 
   const handleSaveResume = async (data) => {
-    try {
-      await saveResume(data);
-      setResumeData(data);
-      alert('简历已保存');
-    } catch (error) {
-      console.error('保存失败:', error);
-      alert('保存失败: ' + error.message);
-    }
+    await saveResume(data);
+    setResumeData(data);
   };
 
   const handleCareerLibraryChange = (next) => {
