@@ -4,6 +4,7 @@ import {
   generateExampleProjects,
   regenerateExperience,
   resetSessionForTests,
+  rewriteExperience,
 } from '../utils/experienceApi';
 
 function jsonResponse(data) {
@@ -169,6 +170,41 @@ describe('经历生成 API 客户端', () => {
     expect(JSON.parse(call[1].body)).toEqual({
       source_experience_id: 'exp_go',
       user_feedback: '突出性能优化',
+    });
+  });
+
+  test('整段重写提交岗位分析、经历和反馈', async () => {
+    fetch.mockImplementation(async (url) => {
+      if (String(url).endsWith('/api/v1/session')) {
+        return jsonResponse({
+          token: 'signed-token',
+          expiresAt: Date.now() + 86400000,
+        });
+      }
+      return jsonResponse({
+        description: '新描述',
+        responsibilities: ['新职责'],
+        achievements: ['新成果'],
+      });
+    });
+
+    const data = await rewriteExperience({
+      kind: 'work',
+      jobAnalysis: { position: 'Go 后端工程师' },
+      experience: { company: '某公司', description: '负责订单服务' },
+      userFeedback: '突出性能',
+    });
+
+    expect(data.description).toBe('新描述');
+    const call = fetch.mock.calls.find(([url]) =>
+      String(url).includes('/rewrite-experience')
+    );
+    expect(call[1].method).toBe('POST');
+    expect(JSON.parse(call[1].body)).toEqual({
+      kind: 'work',
+      job_analysis: { position: 'Go 后端工程师' },
+      experience: { company: '某公司', description: '负责订单服务' },
+      user_feedback: '突出性能',
     });
   });
 });

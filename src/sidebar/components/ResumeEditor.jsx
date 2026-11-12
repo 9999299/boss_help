@@ -10,6 +10,7 @@ import {
   updateEvidenceItem,
 } from '../../utils/resumeSchema';
 import { exportResumePdf, exportResumeDocx } from '../../utils/exportResume';
+import { rewriteExperience } from '../../utils/experienceApi';
 
 const splitList = (value) =>
   String(value || '')
@@ -17,12 +18,18 @@ const splitList = (value) =>
     .map((item) => item.trim())
     .filter(Boolean);
 
-const ResumeEditor = ({ initialData, onSave }) => {
+const ResumeEditor = ({ initialData, onSave, jobAnalysis }) => {
   const [resumeData, setResumeData] = useState(() => normalizeResume());
   const [educationTemplate, setEducationTemplate] = useState('本科');
   const [saveState, setSaveState] = useState('idle');
   const [saveError, setSaveError] = useState('');
   const [showExportPicker, setShowExportPicker] = useState(false);
+  const [rewriteState, setRewriteState] = useState({
+    key: '',
+    status: 'idle',
+  });
+  const [rewriteMessage, setRewriteMessage] = useState('');
+  const [rewriteError, setRewriteError] = useState('');
 
   useEffect(() => {
     setResumeData(normalizeResume(initialData || {}));
@@ -101,9 +108,82 @@ const ResumeEditor = ({ initialData, onSave }) => {
     setShowExportPicker(false);
   };
 
+  const hasJobAnalysis = Boolean(
+    jobAnalysis &&
+      (jobAnalysis.position ||
+        jobAnalysis.job_title ||
+        (jobAnalysis.coreRequirements || []).length ||
+        (jobAnalysis.required_skills || []).length)
+  );
+
+  const hasExperienceText = (entry) =>
+    [
+      entry?.description,
+      ...(entry?.responsibilities || []),
+      ...(entry?.achievements || []),
+    ].some((value) => String(value || '').trim());
+
+  const handleRewrite = async (collection, index, kind, normalizer) => {
+    if (!hasJobAnalysis) {
+      setRewriteError('请先完成岗位分析，再重新生成');
+      return;
+    }
+    const entry = resumeData[collection]?.[index];
+    if (!entry || !hasExperienceText(entry)) {
+      setRewriteError('请先填写这段经历的描述、职责或成果');
+      return;
+    }
+    const feedback =
+      typeof window !== 'undefined' && typeof window.prompt === 'function'
+        ? window.prompt(
+            '希望如何调整这段经历？',
+            '突出与岗位相关的真实技术栈和成果'
+          )
+        : '';
+    if (feedback === null) return;
+    const key = `${collection}-${index}`;
+    setRewriteMessage('');
+    setRewriteError('');
+    setRewriteState({ key, status: 'loading' });
+    try {
+      const data = await rewriteExperience({
+        kind,
+        jobAnalysis,
+        experience: entry,
+        userFeedback: feedback,
+      });
+      updateItem(
+        collection,
+        index,
+        {
+          description: data.description,
+          responsibilities: data.responsibilities,
+          achievements: data.achievements,
+        },
+        normalizer
+      );
+      setRewriteState({ key: '', status: 'idle' });
+      setRewriteMessage(
+        `已重新生成「${entry.company || entry.name || '这段经历'}」，请确认内容`
+      );
+    } catch (error) {
+      setRewriteState({ key: '', status: 'idle' });
+      setRewriteError(error.message || '重新生成失败');
+    }
+  };
+
   return (
     <div className="resume-editor">
       <h3>简历编辑器</h3>
+      {rewriteError && (
+        <div className="error-message" role="alert">
+          {rewriteError}
+        </div>
+      )}
+      {rewriteMessage && <p className="success-message">{rewriteMessage}</p>}
+      {!hasJobAnalysis && (
+        <p className="hint">请先完成岗位分析，再重新生成。</p>
+      )}
 
       <div className="section">
         <h4>个人信息</h4>
@@ -423,6 +503,28 @@ const ResumeEditor = ({ initialData, onSave }) => {
             </label>
             <button
               type="button"
+              className="btn btn-secondary"
+              disabled={
+                !hasJobAnalysis ||
+                !hasExperienceText(entry) ||
+                rewriteState.status === 'loading'
+              }
+              onClick={() =>
+                handleRewrite(
+                  'experience',
+                  index,
+                  'work',
+                  normalizeExperience
+                )
+              }
+            >
+              {rewriteState.status === 'loading' &&
+              rewriteState.key === `experience-${index}`
+                ? '生成中…'
+                : '按岗位重新生成这段'}
+            </button>
+            <button
+              type="button"
               className="btn btn-danger"
               onClick={() => removeItem('experience', index)}
             >
@@ -544,6 +646,23 @@ const ResumeEditor = ({ initialData, onSave }) => {
               />
               我已按实际情况核实
             </label>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={
+                !hasJobAnalysis ||
+                !hasExperienceText(project) ||
+                rewriteState.status === 'loading'
+              }
+              onClick={() =>
+                handleRewrite('projects', index, 'project', normalizeProject)
+              }
+            >
+              {rewriteState.status === 'loading' &&
+              rewriteState.key === `projects-${index}`
+                ? '生成中…'
+                : '按岗位重新生成这段'}
+            </button>
             <button
               type="button"
               className="btn btn-danger"
