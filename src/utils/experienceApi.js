@@ -296,6 +296,24 @@ export async function regenerateExperience({
   );
 }
 
+export async function rewriteExperience({
+  kind,
+  jobAnalysis,
+  experience,
+  userFeedback,
+}) {
+  return authenticatedRequest('/api/v1/rewrite-experience', {
+    method: 'POST',
+    body: {
+      kind,
+      job_analysis: jobAnalysis,
+      experience,
+      user_feedback: userFeedback,
+    },
+    timeout: 60000,
+  });
+}
+
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

@@ -29,6 +29,7 @@ const {
   buildExampleProjectsPrompt,
   normalizeExampleProjects,
 } = require('../agent/example-projects.cjs');
+const { rewriteExperience } = require('../agent/rewrite.cjs');
 
 let sharedModel;
 
@@ -660,6 +661,17 @@ function createV1Handler({
           userFeedback: String(body.user_feedback || '').slice(0, 500),
         });
         return ok(res, regenerated, '整段经历已重新生成');
+      }
+
+      if (path === '/rewrite-experience' && req.method === 'POST') {
+        const rewritten = await rewriteExperience({
+          model: resolveModel(),
+          kind: body.kind,
+          jobAnalysis: body.job_analysis,
+          experience: body.experience,
+          userFeedback: String(body.user_feedback || '').slice(0, 500),
+        });
+        return ok(res, rewritten, '已重新生成这段经历');
       }
 
       const error = new Error('接口不存在');

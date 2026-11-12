@@ -1,12 +1,22 @@
 require('@testing-library/jest-dom');
-const { render, screen, fireEvent } = require('@testing-library/react');
+const {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} = require('@testing-library/react');
 
 jest.mock('../utils/exportResume', () => ({
   exportResumePdf: jest.fn(),
   exportResumeDocx: jest.fn(),
 }));
 
+jest.mock('../utils/experienceApi', () => ({
+  rewriteExperience: jest.fn(),
+}));
+
 const { exportResumePdf, exportResumeDocx } = require('../utils/exportResume');
+const { rewriteExperience } = require('../utils/experienceApi');
 const ResumeEditor = require('../sidebar/components/ResumeEditor').default;
 
 const resume = {
@@ -55,6 +65,11 @@ const resume = {
 };
 
 describe('ResumeEditor v2', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    window.prompt = jest.fn(() => '突出性能');
+  });
+
   test('展示项目成果、候选公司和个人优势编辑区', () => {
     render(<ResumeEditor initialData={resume} onSave={jest.fn()} />);
 
@@ -294,5 +309,148 @@ describe('ResumeEditor v2', () => {
     expect(
       screen.queryByText('已保存到本地，请选择导出格式')
     ).not.toBeInTheDocument();
+  });
+
+  test('没有岗位分析时重写按钮禁用并提示', () => {
+    render(
+      <ResumeEditor
+        initialData={{
+          ...resume,
+          projects: [],
+          experience: [
+            {
+              company: '某公司',
+              title: 'Go 工程师',
+              dates: '2021.03 - 2023.06',
+              description: '负责订单服务',
+              responsibilities: ['使用 Go 开发接口'],
+              achievements: [],
+            },
+          ],
+        }}
+        onSave={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByRole('button', { name: '按岗位重新生成这段' })
+    ).toBeDisabled();
+    expect(
+      screen.getByText('请先完成岗位分析，再重新生成。')
+    ).toBeInTheDocument();
+  });
+
+  test('工作经历可按岗位整段重写', async () => {
+    rewriteExperience.mockResolvedValue({
+      description: '新描述',
+      responsibilities: ['新职责'],
+      achievements: ['新成果'],
+    });
+    const jobAnalysis = {
+      position: 'Go 后端工程师',
+      coreRequirements: ['Go'],
+    };
+
+    render(
+      <ResumeEditor
+        jobAnalysis={jobAnalysis}
+        initialData={{
+          ...resume,
+          projects: [],
+          experience: [
+            {
+              company: '某公司',
+              title: 'Go 工程师',
+              dates: '2021.03 - 2023.06',
+              description: '负责订单服务',
+              responsibilities: ['使用 Go 开发接口'],
+              achievements: [],
+            },
+          ],
+        }}
+        onSave={jest.fn()}
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: '按岗位重新生成这段' })
+    );
+
+    await waitFor(() => {
+      expect(rewriteExperience).toHaveBeenCalledWith({
+        kind: 'work',
+        jobAnalysis,
+        experience: expect.objectContaining({ company: '某公司' }),
+        userFeedback: '突出性能',
+      });
+    });
+    expect(screen.getByDisplayValue('新描述')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('新职责')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('新成果')).toBeInTheDocument();
+  });
+
+  test('重写失败时保留原文并显示错误', async () => {
+    rewriteExperience.mockRejectedValue(
+      new Error('原始经历没有 Kubernetes 的技术证据')
+    );
+
+    render(
+      <ResumeEditor
+        jobAnalysis={{ position: 'Go 后端工程师' }}
+        initialData={{
+          ...resume,
+          projects: [],
+          experience: [
+            {
+              company: '某公司',
+              title: 'Go 工程师',
+              dates: '2021.03 - 2023.06',
+              description: '负责订单服务',
+              responsibilities: ['使用 Go 开发接口'],
+              achievements: [],
+            },
+          ],
+        }}
+        onSave={jest.fn()}
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: '按岗位重新生成这段' })
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('原始经历没有 Kubernetes 的技术证据')
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByDisplayValue('负责订单服务')).toBeInTheDocument();
+  });
+
+  test('项目经历按钮以 project 类型调用重写接口', async () => {
+    rewriteExperience.mockResolvedValue({
+      description: '新的项目描述',
+      responsibilities: [],
+      achievements: [],
+    });
+
+    render(
+      <ResumeEditor
+        jobAnalysis={{ position: 'Java 后端工程师' }}
+        initialData={resume}
+        onSave={jest.fn()}
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: '按岗位重新生成这段' })
+    );
+
+    await waitFor(() => {
+      expect(rewriteExperience).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'project' })
+      );
+    });
+    expect(screen.getByDisplayValue('新的项目描述')).toBeInTheDocument();
   });
 });

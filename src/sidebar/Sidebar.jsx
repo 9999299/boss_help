@@ -190,7 +190,11 @@ const Sidebar = () => {
                 已生成简历
               </div>
             )}
-            <ResumeEditor initialData={resumeData} onSave={handleSaveResume} />
+            <ResumeEditor
+              initialData={resumeData}
+              jobAnalysis={analysisResult}
+              onSave={handleSaveResume}
+            />
           </div>
         )}
 
