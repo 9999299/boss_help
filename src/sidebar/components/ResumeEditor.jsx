@@ -134,6 +134,104 @@ const ResumeEditor = ({ initialData, onSave }) => {
       </div>
 
       <div className="section">
+        <h4>教育经历</h4>
+        <div className="form-group">
+          <label htmlFor="education-template">学历模版</label>
+          <select
+            id="education-template"
+            value={educationTemplate}
+            onChange={(e) => setEducationTemplate(e.target.value)}
+          >
+            <option value="大专">大专</option>
+            <option value="本科">本科</option>
+            <option value="硕士">硕士</option>
+            <option value="博士">博士</option>
+          </select>
+        </div>
+        {(resumeData.education || []).length === 0 && (
+          <p className="hint">暂无教育经历，点击下方按钮添加。</p>
+        )}
+        {(resumeData.education || []).map((education, index) => (
+          <div key={`education-${index}`} className="evidence-item">
+            <input
+              type="text"
+              placeholder="学校名称"
+              value={education.school}
+              onChange={(e) =>
+                updateItem(
+                  'education',
+                  index,
+                  { school: e.target.value },
+                  normalizeEducation
+                )
+              }
+            />
+            <input
+              type="text"
+              placeholder="专业"
+              value={education.major}
+              onChange={(e) =>
+                updateItem(
+                  'education',
+                  index,
+                  { major: e.target.value },
+                  normalizeEducation
+                )
+              }
+            />
+            <input
+              type="text"
+              placeholder="学历（如 本科、硕士）"
+              value={education.degree}
+              onChange={(e) =>
+                updateItem(
+                  'education',
+                  index,
+                  { degree: e.target.value },
+                  normalizeEducation
+                )
+              }
+            />
+            <input
+              type="text"
+              placeholder="起止时间（如 2018.09 - 2022.06）"
+              value={education.dates}
+              onChange={(e) =>
+                updateItem(
+                  'education',
+                  index,
+                  { dates: e.target.value },
+                  normalizeEducation
+                )
+              }
+            />
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={() => removeItem('education', index)}
+            >
+              删除教育经历
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() =>
+            addItem(
+              'education',
+              normalizeEducation({
+                source: 'user',
+                degree: educationTemplate,
+              })
+            )
+          }
+        >
+          添加教育经历
+        </button>
+      </div>
+
+      <div className="section">
         <h4>工作年限</h4>
         <div className="evidence-item summary-item">
           <input
@@ -463,104 +561,6 @@ const ResumeEditor = ({ initialData, onSave }) => {
           }
         >
           添加项目
-        </button>
-      </div>
-
-      <div className="section">
-        <h4>教育经历</h4>
-        <div className="form-group">
-          <label htmlFor="education-template">学历模版</label>
-          <select
-            id="education-template"
-            value={educationTemplate}
-            onChange={(e) => setEducationTemplate(e.target.value)}
-          >
-            <option value="大专">大专</option>
-            <option value="本科">本科</option>
-            <option value="硕士">硕士</option>
-            <option value="博士">博士</option>
-          </select>
-        </div>
-        {(resumeData.education || []).length === 0 && (
-          <p className="hint">暂无教育经历，点击下方按钮添加。</p>
-        )}
-        {(resumeData.education || []).map((education, index) => (
-          <div key={`education-${index}`} className="evidence-item">
-            <input
-              type="text"
-              placeholder="学校名称"
-              value={education.school}
-              onChange={(e) =>
-                updateItem(
-                  'education',
-                  index,
-                  { school: e.target.value },
-                  normalizeEducation
-                )
-              }
-            />
-            <input
-              type="text"
-              placeholder="专业"
-              value={education.major}
-              onChange={(e) =>
-                updateItem(
-                  'education',
-                  index,
-                  { major: e.target.value },
-                  normalizeEducation
-                )
-              }
-            />
-            <input
-              type="text"
-              placeholder="学历（如 本科、硕士）"
-              value={education.degree}
-              onChange={(e) =>
-                updateItem(
-                  'education',
-                  index,
-                  { degree: e.target.value },
-                  normalizeEducation
-                )
-              }
-            />
-            <input
-              type="text"
-              placeholder="起止时间（如 2018.09 - 2022.06）"
-              value={education.dates}
-              onChange={(e) =>
-                updateItem(
-                  'education',
-                  index,
-                  { dates: e.target.value },
-                  normalizeEducation
-                )
-              }
-            />
-            <button
-              type="button"
-              className="btn btn-danger"
-              onClick={() => removeItem('education', index)}
-            >
-              删除教育经历
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={() =>
-            addItem(
-              'education',
-              normalizeEducation({
-                source: 'user',
-                degree: educationTemplate,
-              })
-            )
-          }
-        >
-          添加教育经历
         </button>
       </div>
 

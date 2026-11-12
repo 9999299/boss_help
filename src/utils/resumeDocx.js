@@ -83,6 +83,14 @@ function buildResumeDocChildren(resumeData) {
     children.push(paragraph(info.summary));
   }
 
+  if ((data.education || []).length) {
+    children.push(heading('教育经历'));
+    data.education.forEach((item) => {
+      const details = [item.major, item.degree].filter(Boolean).join(' · ');
+      children.push(itemHead(item.school || '', details, item.dates));
+    });
+  }
+
   if ((data.skills || []).length) {
     children.push(heading('技能'));
     children.push(paragraph(data.skills.join(' · ')));
@@ -174,14 +182,6 @@ function buildResumeDocChildren(resumeData) {
         children.push(paragraph('证据建议', { size: 20, color: '555555' }));
         children.push(...bullets(item.evidenceSuggestions));
       }
-    });
-  }
-
-  if ((data.education || []).length) {
-    children.push(heading('教育经历'));
-    data.education.forEach((item) => {
-      const details = [item.major, item.degree].filter(Boolean).join(' · ');
-      children.push(itemHead(item.school || '', details, item.dates));
     });
   }
 

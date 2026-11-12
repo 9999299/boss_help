@@ -39,6 +39,10 @@ describe('buildResumeHtml', () => {
     expect(html).toContain('某大学');
     expect(html).toContain('计算机科学 · 本科');
     expect(html).toContain('2016-2020');
+    expect(html.indexOf('教育经历')).toBeGreaterThan(
+      html.indexOf('个人简介')
+    );
+    expect(html.indexOf('教育经历')).toBeLessThan(html.indexOf('技能'));
   });
 
   test('escapes HTML in user fields', () => {

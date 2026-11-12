@@ -186,12 +186,12 @@ export function buildResumeHtml(resumeData) {
   ${contact ? `<div class="contact">${contact}</div>` : ''}
   ${yearsHtml}
   ${summaryHtml}
+  ${eduHtml}
   ${skillsHtml}
   ${expHtml}
   ${projectsHtml}
   ${companyCandidatesHtml}
   ${strengthsHtml}
-  ${eduHtml}
 </body>
 </html>`;
 }

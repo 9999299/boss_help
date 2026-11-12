@@ -71,6 +71,19 @@ describe('ResumeEditor v2', () => {
     expect(screen.queryByText('待核实')).not.toBeInTheDocument();
   });
 
+  test('教育经历位于个人信息之后、工作年限之前', () => {
+    render(<ResumeEditor initialData={resume} onSave={jest.fn()} />);
+    const headings = screen
+      .getAllByRole('heading', { level: 4 })
+      .map((node) => node.textContent);
+    expect(headings.indexOf('教育经历')).toBeGreaterThan(
+      headings.indexOf('个人信息')
+    );
+    expect(headings.indexOf('教育经历')).toBeLessThan(
+      headings.indexOf('工作年限')
+    );
+  });
+
   test('编辑候选公司后重置核实状态并保存完整结构', () => {
     const onSave = jest.fn();
     render(<ResumeEditor initialData={resume} onSave={onSave} />);
