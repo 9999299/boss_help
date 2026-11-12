@@ -276,6 +276,26 @@ export async function regenerateBullet({
   );
 }
 
+export async function regenerateExperience({
+  generationId,
+  sourceExperienceId,
+  userFeedback,
+}) {
+  return authenticatedRequest(
+    `/api/v1/experience-generations/${encodeURIComponent(
+      generationId
+    )}/regenerate-experience`,
+    {
+      method: 'POST',
+      body: {
+        source_experience_id: sourceExperienceId,
+        user_feedback: userFeedback,
+      },
+      timeout: 60000,
+    }
+  );
+}
+
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

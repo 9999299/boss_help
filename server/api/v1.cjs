@@ -20,7 +20,11 @@ const {
   triggerRun,
 } = require('../agent/pipeline.cjs');
 const { parseResume } = require('../agent/resume.cjs');
-const { flattenBullets, regenerateBullet } = require('../agent/regenerate.cjs');
+const {
+  flattenBullets,
+  regenerateBullet,
+  regenerateExperience,
+} = require('../agent/regenerate.cjs');
 const {
   buildExampleProjectsPrompt,
   normalizeExampleProjects,
@@ -633,6 +637,29 @@ function createV1Handler({
           userFeedback: String(body.user_feedback || '').slice(0, 500),
         });
         return ok(res, regenerated, '单条描述已重新生成');
+      }
+
+      const regenerateExperienceMatch = path.match(
+        /^\/experience-generations\/([^/]+)\/regenerate-experience$/
+      );
+      if (regenerateExperienceMatch && req.method === 'POST') {
+        const sourceExperienceId = String(
+          body.source_experience_id || ''
+        ).trim();
+        if (!sourceExperienceId) {
+          const error = new Error('source_experience_id 不能为空');
+          error.statusCode = 400;
+          throw error;
+        }
+        const regenerated = await regenerateExperience({
+          repository,
+          model: resolveModel(),
+          ctx,
+          generationId: regenerateExperienceMatch[1],
+          sourceExperienceId,
+          userFeedback: String(body.user_feedback || '').slice(0, 500),
+        });
+        return ok(res, regenerated, '整段经历已重新生成');
       }
 
       const error = new Error('接口不存在');
