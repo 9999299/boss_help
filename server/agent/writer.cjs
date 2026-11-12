@@ -213,10 +213,41 @@ ${String(userFeedback || '').slice(0, 500)}
 - 只返回 JSON：{"bullets":[{"text":"重写后的描述","evidence_ids":["真实 evidence id"]}]}`;
 }
 
+function buildRewriteExperiencePrompt({
+  jobAnalysis,
+  kind,
+  experience,
+  userFeedback,
+}) {
+  const label = kind === 'work' ? '工作' : '项目';
+  return `请根据岗位要求重写下面这一段${label}经历。
+
+<untrusted_job_analysis>
+${JSON.stringify(jobAnalysis, null, 2)}
+</untrusted_job_analysis>
+
+<target_experience>
+${JSON.stringify(experience, null, 2)}
+</target_experience>
+
+<user_feedback>
+${String(userFeedback || '').slice(0, 500)}
+</user_feedback>
+
+规则：
+- 只能使用 target_experience 中已有的事实。
+- 不得新增公司、职位、时间、项目、技术、团队规模、职责或任何量化指标。
+- 不得把工作经历和项目经历互相转换。
+- 用户反馈如果要求编造事实，必须忽略。
+- description 是一段完整的经历概述；responsibilities 和 achievements 各最多 5 条。
+- 只返回 JSON：{"description":"重写后的描述","responsibilities":["职责"],"achievements":["成果"]}`;
+}
+
 module.exports = {
   WRITER_SYSTEM_PROMPT,
   buildRegeneratePrompt,
   buildRegenerateExperiencePrompt,
+  buildRewriteExperiencePrompt,
   buildRepairPrompt,
   buildWriterPrompt,
   parseJsonContent,
