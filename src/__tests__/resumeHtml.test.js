@@ -127,10 +127,14 @@ describe('buildResumeHtml', () => {
 
     expect(html).toContain('项目成果');
     expect(html).toContain('延迟降低 20%');
-    expect(html).toContain('候选公司经历（待核实）');
+    expect(html).toContain('公司经历');
     expect(html).toContain('示例科技');
-    expect(html).toContain('个人优势（请按实际核实）');
+    expect(html).toContain('个人优势');
     expect(html).toContain('系统设计');
+    expect(html).not.toContain('待核实');
+    expect(html).not.toContain('示例项目');
+    expect(html).not.toContain('请按实际修改');
+    expect(html).not.toContain('优势草稿');
   });
 
   test('includes work years summary in the header', () => {

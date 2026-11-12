@@ -45,7 +45,7 @@ const ExampleProjectsSection = ({
           : []
       );
     } catch (generateError) {
-      setError(generateError.message || '生成示例项目失败');
+      setError(generateError.message || '生成项目建议失败');
     } finally {
       setLoading(false);
     }
@@ -83,7 +83,7 @@ const ExampleProjectsSection = ({
   return (
     <div className="example-projects">
       <div className="example-projects-header">
-        <h4>示例项目</h4>
+        <h4>项目建议</h4>
         <button
           type="button"
           className="btn btn-secondary"
@@ -91,15 +91,13 @@ const ExampleProjectsSection = ({
           onClick={handleGenerate}
         >
           {loading
-            ? '正在生成示例项目...'
+            ? '正在生成项目建议...'
             : projects.length
-              ? '重新生成示例项目'
-              : '生成示例项目'}
+              ? '重新生成项目建议'
+              : '生成项目建议'}
         </button>
       </div>
-      <p className="hint">
-        根据岗位缺口生成示例项目草稿。示例内容不代表真实经历，加入经历库后仍为未核实状态，请先核实再用于简历。
-      </p>
+      <p className="hint">根据岗位缺口生成项目建议，可编辑后加入经历库。</p>
 
       {missingRequirements.length > 0 && (
         <div className="gap-chips">
@@ -125,8 +123,6 @@ const ExampleProjectsSection = ({
           <div className="example-project-card" key={key}>
             <div className="example-project-title">
               <strong>{project.name}</strong>
-              <span className="example-badge">示例</span>
-              <span className="example-badge pending">待核实</span>
             </div>
             <p className="example-project-meta">
               {[project.role, project.dates].filter(Boolean).join(' · ')}

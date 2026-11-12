@@ -91,7 +91,6 @@ function buildResumeDocChildren(resumeData) {
   if ((data.experience || []).length) {
     children.push(heading('工作经历'));
     data.experience.forEach((item) => {
-      const status = item.userConfirmed ? '已核实' : '工作经历草稿 · 待核实';
       children.push(
         itemHead(
           item.company || '未命名公司',
@@ -99,12 +98,14 @@ function buildResumeDocChildren(resumeData) {
           item.dates
         )
       );
-      children.push(
-        paragraph(`${status}${item.location ? ` · ${item.location}` : ''}`, {
-          size: 18,
-          color: '8A5A00',
-        })
-      );
+      if (item.location) {
+        children.push(
+          paragraph(item.location, {
+            size: 18,
+            color: '8A5A00',
+          })
+        );
+      }
       if (item.description) children.push(paragraph(item.description));
       if ((item.responsibilities || []).length) {
         children.push(paragraph('主要职责', { size: 20, color: '555555' }));
@@ -120,11 +121,9 @@ function buildResumeDocChildren(resumeData) {
   if ((data.projects || []).length) {
     children.push(heading('项目经历'));
     data.projects.forEach((item) => {
-      const status = item.userConfirmed ? '已核实' : '示例项目 · 请按实际修改';
       children.push(
         itemHead(item.name || '', item.role ? `(${item.role})` : '', item.dates)
       );
-      children.push(paragraph(status, { size: 18, color: '8A5A00' }));
       if ((item.techStack || []).length) {
         children.push(
           paragraph(item.techStack.join(' · '), { size: 20, color: '555555' })
@@ -139,15 +138,8 @@ function buildResumeDocChildren(resumeData) {
   }
 
   if ((data.companyCandidates || []).length) {
-    children.push(heading('候选公司经历（待核实）'));
-    children.push(
-      paragraph(
-        '以下公司仅为岗位匹配候选，不代表真实任职经历，请按实际情况核实。',
-        { size: 18, color: '8A5A00' }
-      )
-    );
+    children.push(heading('公司经历'));
     data.companyCandidates.forEach((item) => {
-      const status = item.userConfirmed ? '已核实' : '候选公司 · 待核实';
       children.push(
         itemHead(
           item.company || '',
@@ -155,12 +147,11 @@ function buildResumeDocChildren(resumeData) {
           item.location
         )
       );
-      children.push(
-        paragraph(`${status}${item.industry ? ` · ${item.industry}` : ''}`, {
-          size: 18,
-          color: '8A5A00',
-        })
-      );
+      if (item.industry) {
+        children.push(
+          paragraph(item.industry, { size: 18, color: '8A5A00' })
+        );
+      }
       if (item.matchReason) children.push(paragraph(item.matchReason));
       if ((item.suggestedResponsibilities || []).length) {
         children.push(paragraph('建议职责', { size: 20, color: '555555' }));
@@ -170,11 +161,9 @@ function buildResumeDocChildren(resumeData) {
   }
 
   if ((data.strengths || []).length) {
-    children.push(heading('个人优势（请按实际核实）'));
+    children.push(heading('个人优势'));
     data.strengths.forEach((item) => {
-      const status = item.userConfirmed ? '已核实' : '优势草稿 · 待核实';
       children.push(itemHead(item.title || ''));
-      children.push(paragraph(status, { size: 18, color: '8A5A00' }));
       if (item.description) children.push(paragraph(item.description));
       if ((item.keywords || []).length) {
         children.push(

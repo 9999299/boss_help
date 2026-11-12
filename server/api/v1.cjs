@@ -316,7 +316,7 @@ function createV1Handler({
           model: resolveModel(),
           step: 'example_projects',
           system:
-            '你是严谨的职业顾问。生成的示例项目只是草稿，不得伪造真实任职。只返回 JSON。',
+            '你是严谨的职业顾问。生成的项目建议只是待补充内容，不得伪造真实任职。只返回 JSON。',
           user: buildExampleProjectsPrompt({
             jobAnalysis,
             missingRequirements: missing,
@@ -332,7 +332,7 @@ function createV1Handler({
         return ok(
           res,
           { projects, missing_requirements: missing },
-          '示例项目已生成'
+          '项目建议已生成'
         );
       }
 

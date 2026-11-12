@@ -57,7 +57,7 @@ describe('ExampleProjectsSection', () => {
     }));
   });
 
-  test('按缺口生成示例项目并展示示例标记', async () => {
+  test('按缺口生成项目建议并展示内容', async () => {
     render(
       <ExampleProjectsSection
         jobData={jobData}
@@ -66,7 +66,7 @@ describe('ExampleProjectsSection', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('生成示例项目'));
+    fireEvent.click(screen.getByText('生成项目建议'));
 
     await waitFor(() => {
       expect(screen.getByText('RAG 知识库服务')).toBeInTheDocument();
@@ -74,11 +74,11 @@ describe('ExampleProjectsSection', () => {
     expect(experienceApi.generateExampleProjects).toHaveBeenCalledWith(
       expect.objectContaining({ jobData, analysisResult })
     );
-    expect(screen.getByText('示例')).toBeInTheDocument();
-    expect(screen.getByText('待核实')).toBeInTheDocument();
+    expect(screen.queryByText('示例')).not.toBeInTheDocument();
+    expect(screen.queryByText('待核实')).not.toBeInTheDocument();
   });
 
-  test('加入经历库时使用未核实的示例草稿', async () => {
+  test('加入经历库时使用未核实的内容', async () => {
     const onChange = jest.fn();
     render(
       <ExampleProjectsSection
@@ -89,7 +89,7 @@ describe('ExampleProjectsSection', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('生成示例项目'));
+    fireEvent.click(screen.getByText('生成项目建议'));
     await waitFor(() => {
       expect(screen.getByText('RAG 知识库服务')).toBeInTheDocument();
     });
@@ -124,7 +124,7 @@ describe('ExampleProjectsSection', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('生成示例项目'));
+    fireEvent.click(screen.getByText('生成项目建议'));
     await waitFor(() => {
       expect(screen.getByText('AI 服务响应超时，请重试')).toBeInTheDocument();
     });

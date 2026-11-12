@@ -139,22 +139,15 @@ describe('Sidebar', () => {
     fireEvent.click(screen.getByRole('button', { name: '分析职位' }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText('项目经历草稿（待核实，请按实际修改）')
-      ).toBeInTheDocument();
+      expect(screen.getByText('项目经历')).toBeInTheDocument();
     });
-    expect(
-      screen.getByText('工作经历草稿（待核实，请按实际修改）')
-    ).toBeInTheDocument();
+    expect(screen.getByText('工作经历')).toBeInTheDocument();
     expect(screen.getByText('从页面提取')).toBeInTheDocument();
     expect(screen.queryByText('岗位亮点')).not.toBeInTheDocument();
     expect(screen.queryByText('技能匹配')).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('候选公司（待核实，不代表真实任职）')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('个人优势草稿（请用事实核实）')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('公司经历')).not.toBeInTheDocument();
+    expect(screen.queryByText('个人优势')).not.toBeInTheDocument();
+    expect(screen.queryByText(/待核实/)).not.toBeInTheDocument();
   });
 
   test('确认生成后进入简历编辑并带入项目和经历', async () => {
@@ -185,9 +178,7 @@ describe('Sidebar', () => {
 
     await waitFor(() => {
       expect(screen.getByText('简历编辑器')).toBeInTheDocument();
-      expect(
-        screen.getByText('已生成简历草稿，请核对后再使用')
-      ).toBeInTheDocument();
+      expect(screen.getByText('已生成简历')).toBeInTheDocument();
       expect(screen.queryByText('岗位分析结果')).not.toBeInTheDocument();
       expect(
         screen.queryByRole('button', { name: '确认生成' })

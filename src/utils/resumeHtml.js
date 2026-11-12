@@ -68,8 +68,7 @@ export function buildResumeHtml(resumeData) {
               .filter(Boolean)
               .map((achievement) => `<li>${achievement}</li>`)
               .join('');
-            const status = e.userConfirmed ? '已核实' : '工作经历草稿 · 待核实';
-            return `<div class="item"><div class="item-head"><strong>${company || '未命名公司'}</strong>${title ? ` · ${title}` : ''} <span class="dates">${dates}</span></div><p class="evidence-label">${status}${location ? ` · ${location}` : ''}</p>${desc ? `<p>${desc}</p>` : ''}${responsibilities ? `<p class="tech">主要职责</p><ul>${responsibilities}</ul>` : ''}${achievements ? `<p class="tech">工作成果</p><ul>${achievements}</ul>` : ''}</div>`;
+            return `<div class="item"><div class="item-head"><strong>${company || '未命名公司'}</strong>${title ? ` · ${title}` : ''} <span class="dates">${dates}</span></div>${location ? `<p class="evidence-label">${location}</p>` : ''}${desc ? `<p>${desc}</p>` : ''}${responsibilities ? `<p class="tech">主要职责</p><ul>${responsibilities}</ul>` : ''}${achievements ? `<p class="tech">工作成果</p><ul>${achievements}</ul>` : ''}</div>`;
           })
           .join('')}</section>`
       : '';
@@ -88,17 +87,14 @@ export function buildResumeHtml(resumeData) {
               .filter(Boolean)
               .map((achievement) => `<li>${achievement}</li>`)
               .join('');
-            const status = p.userConfirmed
-              ? '已核实'
-              : '示例项目 · 请按实际修改';
-            return `<div class="item"><div class="item-head"><strong>${pname}</strong> ${role ? `(${role})` : ''} <span class="dates">${dates}</span></div><p class="evidence-label">${status}</p>${tech ? `<p class="tech">${tech}</p>` : ''}${desc ? `<p>${desc}</p>` : ''}${achievements ? `<p class="tech">项目成果</p><ul>${achievements}</ul>` : ''}</div>`;
+            return `<div class="item"><div class="item-head"><strong>${pname}</strong> ${role ? `(${role})` : ''} <span class="dates">${dates}</span></div>${tech ? `<p class="tech">${tech}</p>` : ''}${desc ? `<p>${desc}</p>` : ''}${achievements ? `<p class="tech">项目成果</p><ul>${achievements}</ul>` : ''}</div>`;
           })
           .join('')}</section>`
       : '';
 
   const companyCandidatesHtml =
     companyCandidates.length > 0
-      ? `<section><h2>候选公司经历（待核实）</h2><p class="notice">以下公司仅为岗位匹配候选，不代表真实任职经历，请按实际情况核实。</p>${companyCandidates
+      ? `<section><h2>公司经历</h2>${companyCandidates
           .map((candidate) => {
             const company = escapeHtml(candidate.company || '');
             const role = escapeHtml(candidate.role || '');
@@ -110,17 +106,14 @@ export function buildResumeHtml(resumeData) {
               .filter(Boolean)
               .map((responsibility) => `<li>${responsibility}</li>`)
               .join('');
-            const status = candidate.userConfirmed
-              ? '已核实'
-              : '候选公司 · 待核实';
-            return `<div class="item"><div class="item-head"><strong>${company}</strong> ${role ? `@ ${role}` : ''}<span class="dates">${location}</span></div><p class="evidence-label">${status}${industry ? ` · ${industry}` : ''}</p>${reason ? `<p>${reason}</p>` : ''}${responsibilities ? `<p class="tech">建议职责</p><ul>${responsibilities}</ul>` : ''}</div>`;
+            return `<div class="item"><div class="item-head"><strong>${company}</strong> ${role ? `@ ${role}` : ''}<span class="dates">${location}</span></div>${industry ? `<p class="evidence-label">${industry}</p>` : ''}${reason ? `<p>${reason}</p>` : ''}${responsibilities ? `<p class="tech">建议职责</p><ul>${responsibilities}</ul>` : ''}</div>`;
           })
           .join('')}</section>`
       : '';
 
   const strengthsHtml =
     strengths.length > 0
-      ? `<section><h2>个人优势（请按实际核实）</h2>${strengths
+      ? `<section><h2>个人优势</h2>${strengths
           .map((strength) => {
             const title = escapeHtml(strength.title || '');
             const description = escapeHtml(strength.description || '');
@@ -132,10 +125,7 @@ export function buildResumeHtml(resumeData) {
             const keywords = (strength.keywords || [])
               .map(escapeHtml)
               .join(' · ');
-            const status = strength.userConfirmed
-              ? '已核实'
-              : '优势草稿 · 待核实';
-            return `<div class="item"><div class="item-head"><strong>${title}</strong></div><p class="evidence-label">${status}</p>${description ? `<p>${description}</p>` : ''}${keywords ? `<p class="tech">${keywords}</p>` : ''}${suggestions ? `<p class="tech">证据建议</p><ul>${suggestions}</ul>` : ''}</div>`;
+            return `<div class="item"><div class="item-head"><strong>${title}</strong></div>${description ? `<p>${description}</p>` : ''}${keywords ? `<p class="tech">${keywords}</p>` : ''}${suggestions ? `<p class="tech">证据建议</p><ul>${suggestions}</ul>` : ''}</div>`;
           })
           .join('')}</section>`
       : '';

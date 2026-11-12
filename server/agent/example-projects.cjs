@@ -29,7 +29,7 @@ function buildExampleProjectsPrompt({
     techStack: item.data?.techStack || [],
     responsibilities: item.data?.responsibilities || [],
   }));
-  return `你是严谨的职业顾问。请为下面岗位中用户尚未覆盖的要求，生成 ${maxProjects} 个示例项目草稿。示例项目只是帮助用户补充经历库的草稿，绝不能声称用户真实做过，也不能绑定具体公司任职。
+  return `你是严谨的职业顾问。请为下面岗位中用户尚未覆盖的要求，生成 ${maxProjects} 个项目建议。项目建议只是帮助用户补充经历库的内容，绝不能声称用户真实做过，也不能绑定具体公司任职。
 
 <untrusted_job_jd>
 ${String(jobSnapshot.description || '').slice(0, 12000)}
@@ -45,7 +45,7 @@ ${JSON.stringify(evidence)}
 {
   "projects": [
     {
-      "name": "示例项目名称",
+      "name": "项目名称",
       "role": "担任角色",
       "dates": "例如 2024.01 - 2024.06",
       "techStack": ["技术"],
@@ -61,7 +61,8 @@ ${JSON.stringify(evidence)}
 - coveredRequirements 必须来自上面的缺口列表，不得自造。
 - 技术栈只能使用 JD 或已核实经历中出现的技术，不得发明新技术。
 - 描述要具体、可编辑，不要使用无法验证的夸张数字。
-- 不得出现具体公司任职信息，不得声称这是用户的真实经历。`;
+- 不得出现具体公司任职信息，不得声称这是用户的真实经历。
+- 输出文本中不要出现「示例」「草稿」「待核实」「请按实际修改」等字样。`;
 }
 
 function normalizeExampleProjects(

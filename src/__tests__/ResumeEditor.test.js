@@ -60,12 +60,15 @@ describe('ResumeEditor v2', () => {
 
     expect(screen.getByText(/项目经历/)).toBeInTheDocument();
     expect(screen.getByDisplayValue('接口延迟降低 20%')).toBeInTheDocument();
-    expect(screen.getByText(/候选公司经历/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: '公司经历' })
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue('示例科技')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /个人优势/ })
     ).toBeInTheDocument();
     expect(screen.getByDisplayValue('工程落地能力')).toBeInTheDocument();
+    expect(screen.queryByText('待核实')).not.toBeInTheDocument();
   });
 
   test('编辑候选公司后重置核实状态并保存完整结构', () => {

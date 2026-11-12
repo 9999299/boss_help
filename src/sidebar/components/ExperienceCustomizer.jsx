@@ -32,7 +32,7 @@ const STATUS_TEXT = {
   completed: '已完成',
   failed: '生成失败',
   cancelled: '已取消',
-  draft: '草稿',
+  draft: '未确认',
   edited: '已修改',
   confirmed: '已确认',
 };

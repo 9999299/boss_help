@@ -17,14 +17,6 @@ const splitList = (value) =>
     .map((item) => item.trim())
     .filter(Boolean);
 
-const EvidenceState = ({ item }) => (
-  <span
-    className={`evidence-state ${item.userConfirmed ? 'confirmed' : 'pending'}`}
-  >
-    {item.userConfirmed ? '已核实' : '待核实'}
-  </span>
-);
-
 const ResumeEditor = ({ initialData, onSave }) => {
   const [resumeData, setResumeData] = useState(() => normalizeResume());
   const [educationTemplate, setEducationTemplate] = useState('本科');
@@ -142,9 +134,8 @@ const ResumeEditor = ({ initialData, onSave }) => {
       </div>
 
       <div className="section">
-        <h4>工作年限（AI 草稿，请按实际核实）</h4>
+        <h4>工作年限</h4>
         <div className="evidence-item summary-item">
-          <EvidenceState item={resumeData.experienceSummary} />
           <input
             type="text"
             placeholder="总工作年限（如 5年）"
@@ -217,16 +208,15 @@ const ResumeEditor = ({ initialData, onSave }) => {
       </div>
 
       <div className="section">
-        <h4>工作经历（AI 草稿，请按实际修改；按时间倒序）</h4>
+        <h4>工作经历（按时间倒序）</h4>
         {(resumeData.experience || []).length === 0 && (
-          <p className="hint">暂无工作经历，可以添加草稿或先完成职位分析。</p>
+          <p className="hint">暂无工作经历，可以添加或先完成职位分析。</p>
         )}
         {(resumeData.experience || []).map((entry, index) => (
           <div
             key={`experience-${index}`}
             className="evidence-item experience-item"
           >
-            <EvidenceState item={entry} />
             <input
               type="text"
               placeholder="公司名称"
@@ -357,13 +347,12 @@ const ResumeEditor = ({ initialData, onSave }) => {
       </div>
 
       <div className="section">
-        <h4>项目经历（示例项目，请按实际修改）</h4>
+        <h4>项目经历</h4>
         {(resumeData.projects || []).length === 0 && (
-          <p className="hint">暂无项目，可以添加草稿或先完成职位分析。</p>
+          <p className="hint">暂无项目，可以添加或先完成职位分析。</p>
         )}
         {(resumeData.projects || []).map((project, index) => (
           <div key={`project-${index}`} className="evidence-item project-item">
-            <EvidenceState item={project} />
             <input
               type="text"
               placeholder="项目名称"
@@ -577,19 +566,18 @@ const ResumeEditor = ({ initialData, onSave }) => {
 
       {(resumeData.companyCandidates || []).length > 0 && (
         <div className="section">
-          <h4>候选公司经历（待核实，不代表真实任职）</h4>
+          <h4>公司经历</h4>
           {(resumeData.companyCandidates || []).length === 0 && (
-            <p className="hint">暂无候选公司，分析岗位后可自动生成。</p>
+            <p className="hint">暂无公司经历，分析岗位后可自动生成。</p>
           )}
           {(resumeData.companyCandidates || []).map((candidate, index) => (
             <div
               key={`company-${index}`}
               className="evidence-item company-item"
             >
-              <EvidenceState item={candidate} />
               <input
                 type="text"
-                placeholder="候选公司"
+                placeholder="公司名称"
                 value={candidate.company}
                 onChange={(e) =>
                   updateItem(
@@ -685,7 +673,7 @@ const ResumeEditor = ({ initialData, onSave }) => {
                 className="btn btn-danger"
                 onClick={() => removeItem('companyCandidates', index)}
               >
-                删除候选公司
+                删除公司经历
               </button>
             </div>
           ))}
@@ -699,14 +687,14 @@ const ResumeEditor = ({ initialData, onSave }) => {
               )
             }
           >
-            添加候选公司
+            添加公司经历
           </button>
         </div>
       )}
 
       {(resumeData.strengths || []).length > 0 && (
         <div className="section">
-          <h4>个人优势（AI 草稿，请用事实支撑）</h4>
+          <h4>个人优势</h4>
           {(resumeData.strengths || []).length === 0 && (
             <p className="hint">暂无个人优势，分析岗位后可自动生成。</p>
           )}
@@ -715,7 +703,6 @@ const ResumeEditor = ({ initialData, onSave }) => {
               key={`strength-${index}`}
               className="evidence-item strength-item"
             >
-              <EvidenceState item={strength} />
               <input
                 type="text"
                 placeholder="优势标题"

@@ -152,6 +152,7 @@ describe('ExperienceCustomizer', () => {
     });
     expect(screen.getByText('使用 Go 和 Gin 开发订单服务')).toBeInTheDocument();
     expect(screen.getByText(/版本 v1/)).toBeInTheDocument();
+    expect(screen.queryByText('草稿')).not.toBeInTheDocument();
 
     const editor = screen.getByDisplayValue('使用 Go、Gin 开发订单服务');
     fireEvent.change(editor, {
@@ -183,7 +184,7 @@ describe('ExperienceCustomizer', () => {
     expect(screen.getByText(/v0 · 已修改/)).toBeInTheDocument();
   });
 
-  test('岗位定制页展示示例项目生成入口', () => {
+  test('岗位定制页展示项目建议生成入口', () => {
     render(
       <ExperienceCustomizer
         jobData={jobData}
@@ -193,7 +194,7 @@ describe('ExperienceCustomizer', () => {
         onLibraryChange={jest.fn()}
       />
     );
-    expect(screen.getByText('示例项目')).toBeInTheDocument();
-    expect(screen.getByText('生成示例项目')).toBeInTheDocument();
+    expect(screen.getByText('项目建议')).toBeInTheDocument();
+    expect(screen.getByText('生成项目建议')).toBeInTheDocument();
   });
 });

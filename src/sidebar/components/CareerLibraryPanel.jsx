@@ -22,12 +22,6 @@ const splitList = (value) =>
     .map((item) => item.trim())
     .filter(Boolean);
 
-const EvidenceBadge = ({ confirmed }) => (
-  <span className={`evidence-state ${confirmed ? 'confirmed' : 'pending'}`}>
-    {confirmed ? '已核实' : '待核实'}
-  </span>
-);
-
 const CareerLibraryPanel = ({ library, onChange }) => {
   const normalized = normalizeCareerLibrary(library);
   const stats = libraryStats(normalized);
@@ -165,7 +159,7 @@ const CareerLibraryPanel = ({ library, onChange }) => {
               rows={6}
               value={importText}
               onChange={(event) => setImportText(event.target.value)}
-              placeholder="粘贴完整简历文本，AI 会提取工作和项目经历草稿..."
+              placeholder="粘贴完整简历文本，AI 会提取工作和项目经历..."
             />
             <button
               type="button"
@@ -193,7 +187,6 @@ const CareerLibraryPanel = ({ library, onChange }) => {
           .filter((item) => item.kind === 'employment')
           .map((item) => (
             <div className="evidence-item experience-item" key={item.id}>
-              <EvidenceBadge confirmed={item.userConfirmed} />
               <input
                 type="text"
                 placeholder="公司名称"
@@ -314,7 +307,6 @@ const CareerLibraryPanel = ({ library, onChange }) => {
           .filter((item) => item.kind === 'project')
           .map((item) => (
             <div className="evidence-item project-item" key={item.id}>
-              <EvidenceBadge confirmed={item.userConfirmed} />
               <input
                 type="text"
                 placeholder="项目名称"

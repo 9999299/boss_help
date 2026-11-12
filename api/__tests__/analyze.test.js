@@ -88,6 +88,11 @@ describe('analyzeJob', () => {
     expect(prompt).toContain('projects');
     expect(prompt).toContain('experienceSummary');
     expect(prompt).toContain('experience');
+    expect(prompt).not.toContain('个人项目示例');
+    expect(prompt).not.toContain('工作经历草稿');
+    expect(prompt).toContain(
+      '不要出现「示例」「草稿」「待核实」「请按实际修改」'
+    );
   });
 
   test('分析客户端超时足够覆盖慢速推理模型', () => {

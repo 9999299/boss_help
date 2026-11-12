@@ -187,7 +187,7 @@ const Sidebar = () => {
           <div className="editor-transition">
             {editorNotice && (
               <div className="editor-notice" role="status">
-                已生成简历草稿，请核对后再使用
+                已生成简历
               </div>
             )}
             <ResumeEditor initialData={resumeData} onSave={handleSaveResume} />
@@ -246,7 +246,7 @@ const Sidebar = () => {
             (analysisResult.experienceSummary.totalYears ||
               analysisResult.experienceSummary.industryYears) && (
               <div className="analysis-section">
-                <h5>工作年限（待核实）</h5>
+                <h5>工作年限</h5>
                 {analysisResult.experienceSummary.totalYears && (
                   <p>
                     <strong>总工作年限：</strong>
@@ -267,7 +267,7 @@ const Sidebar = () => {
 
           {analysisResult.projects?.length > 0 && (
             <div className="analysis-section">
-              <h5>项目经历草稿（待核实，请按实际修改）</h5>
+              <h5>项目经历</h5>
               <ul>
                 {analysisResult.projects.map((project, i) => (
                   <li key={i}>
@@ -297,7 +297,7 @@ const Sidebar = () => {
 
           {analysisResult.experience?.length > 0 && (
             <div className="analysis-section">
-              <h5>工作经历草稿（待核实，请按实际修改）</h5>
+              <h5>工作经历</h5>
               <ul>
                 {analysisResult.experience.map((exp, i) => (
                   <li key={i}>

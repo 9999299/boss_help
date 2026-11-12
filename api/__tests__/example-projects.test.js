@@ -26,7 +26,11 @@ describe('example projects agent', () => {
     expect(prompt).toContain('RAG');
     expect(prompt).toContain('Kubernetes');
     expect(prompt).toContain('<untrusted_job_jd>');
-    expect(prompt).toMatch(/不得声称|示例/);
+    expect(prompt).toMatch(/不得声称|项目建议/);
+    expect(prompt).not.toContain('示例项目名称');
+    expect(prompt).toContain(
+      '不要出现「示例」「草稿」「待核实」「请按实际修改」'
+    );
   });
 
   test('规范化强制示例状态并过滤非缺口覆盖项', () => {
