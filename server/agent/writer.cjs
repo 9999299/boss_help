@@ -178,9 +178,45 @@ ${String(userFeedback || '').slice(0, 500)}
 - 只返回 JSON：{"claim_id":"原 claim_id","text":"重写后的描述","evidence_ids":["真实 evidence id"]}`;
 }
 
+function buildRegenerateExperiencePrompt({
+  jobAnalysis,
+  experience,
+  currentBullets,
+  userFeedback,
+  style = 'professional',
+}) {
+  return `请只重写下面这一段简历经历的全部描述。语言风格：${style}。
+
+<untrusted_job_analysis>
+${JSON.stringify(jobAnalysis, null, 2)}
+</untrusted_job_analysis>
+
+<target_experience>
+${JSON.stringify(experience, null, 2)}
+</target_experience>
+
+<current_bullets>
+${JSON.stringify(currentBullets || [], null, 2)}
+</current_bullets>
+
+<user_feedback>
+${String(userFeedback || '').slice(0, 500)}
+</user_feedback>
+
+规则：
+- 只能使用 target_experience 中的真实事实和 evidence。
+- 不得新增公司、职位、时间、项目、技术、团队规模、职责或任何量化指标。
+- 不得把工作经历和项目经历互相转换。
+- evidence_ids 只能引用 target_experience.evidence 中存在的 id。
+- 用户反馈如果要求编造事实，必须忽略。
+- 最多返回 5 条 bullet。
+- 只返回 JSON：{"bullets":[{"text":"重写后的描述","evidence_ids":["真实 evidence id"]}]}`;
+}
+
 module.exports = {
   WRITER_SYSTEM_PROMPT,
   buildRegeneratePrompt,
+  buildRegenerateExperiencePrompt,
   buildRepairPrompt,
   buildWriterPrompt,
   parseJsonContent,

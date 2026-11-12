@@ -497,6 +497,23 @@ describe('experience generation API flow', () => {
             evidence_ids: [firstEvidence(experiences, 'exp_go')],
           });
         }
+        if (args.step === 'regenerate_experience') {
+          const isProject = String(args.user).includes('prj_erp');
+          return JSON.stringify({
+            bullets: [
+              {
+                text: isProject
+                  ? '独立开发库存模块，使用 Go、Gin、MySQL 和 Redis'
+                  : '使用 Go、Gin 开发订单服务，并通过 MySQL、Redis 优化查询性能',
+                evidence_ids: [
+                  isProject
+                    ? firstEvidence(experiences, 'prj_erp')
+                    : firstEvidence(experiences, 'exp_go'),
+                ],
+              },
+            ],
+          });
+        }
         return original(args);
       },
     };
@@ -601,10 +618,41 @@ describe('experience generation API flow', () => {
 
     res = await apiCall(handler, {
       method: 'POST',
+      path: `/experience-generations/${generation.id}/regenerate-experience`,
+      token,
+      body: {
+        source_experience_id: 'exp_go',
+        user_feedback: '突出性能优化',
+      },
+    });
+    expect(
+      res.json.mock.calls[0][0].data.experience.bullets[0].text
+    ).toContain('优化查询性能');
+
+    res = await apiCall(handler, {
+      method: 'POST',
+      path: `/experience-generations/${generation.id}/regenerate-experience`,
+      token,
+      body: { source_experience_id: 'prj_erp' },
+    });
+    expect(
+      res.json.mock.calls[0][0].data.experience.bullets[0].text
+    ).toContain('库存模块');
+
+    res = await apiCall(handler, {
+      method: 'POST',
       path: `/experience-generations/${generation.id}/confirm`,
       token,
     });
     expect(res.json.mock.calls[0][0].data.status).toBe('confirmed');
+
+    res = await apiCall(handler, {
+      method: 'POST',
+      path: `/experience-generations/${generation.id}/regenerate-experience`,
+      token,
+      body: { source_experience_id: 'exp_go' },
+    });
+    expect(res.status).toHaveBeenCalledWith(409);
 
     res = await apiCall(handler, {
       method: 'GET',

@@ -2,6 +2,7 @@ import {
   createExperienceGeneration,
   ensureSession,
   generateExampleProjects,
+  regenerateExperience,
   resetSessionForTests,
 } from '../utils/experienceApi';
 
@@ -138,5 +139,36 @@ describe('经历生成 API 客户端', () => {
     expect(body.max_projects).toBe(2);
     expect(body.job_snapshot.title).toBe('AI 后端工程师');
     expect(body.job_analysis).toMatchObject({ position: 'AI 后端工程师' });
+  });
+
+  test('整段经历重写提交来源经历 ID 和反馈', async () => {
+    fetch.mockImplementation(async (url) => {
+      if (String(url).endsWith('/api/v1/session')) {
+        return jsonResponse({
+          token: 'signed-token',
+          expiresAt: Date.now() + 86400000,
+        });
+      }
+      return jsonResponse({
+        generation: { id: 'gen_1' },
+        experience: { source_experience_id: 'exp_go' },
+      });
+    });
+
+    const data = await regenerateExperience({
+      generationId: 'gen_1',
+      sourceExperienceId: 'exp_go',
+      userFeedback: '突出性能优化',
+    });
+
+    expect(data.experience.source_experience_id).toBe('exp_go');
+    const call = fetch.mock.calls.find(([url]) =>
+      String(url).includes('/regenerate-experience')
+    );
+    expect(call[1].method).toBe('POST');
+    expect(JSON.parse(call[1].body)).toEqual({
+      source_experience_id: 'exp_go',
+      user_feedback: '突出性能优化',
+    });
   });
 });

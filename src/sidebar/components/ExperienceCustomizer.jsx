@@ -12,6 +12,7 @@ import {
   getExperienceGeneration,
   listExperienceGenerations,
   regenerateBullet,
+  regenerateExperience,
   retryAgentRun,
   updateExperienceGeneration,
 } from '../../utils/experienceApi';
@@ -203,6 +204,31 @@ const ExperienceCustomizer = ({
       });
       setGeneration(data.generation);
       setMessage('单条描述已重新生成并通过真实性检查');
+    } catch (regenerateError) {
+      setError(regenerateError.message || '重新生成失败');
+    }
+  };
+
+  const handleRegenerateExperience = async (experience) => {
+    if (!generation || generation.status === 'confirmed') return;
+    const feedback =
+      typeof window !== 'undefined' && typeof window.prompt === 'function'
+        ? window.prompt(
+            '希望如何调整这段经历？',
+            '突出与岗位相关的真实技术栈和成果'
+          )
+        : '';
+    if (feedback === null) return;
+    setError('');
+    setMessage('');
+    try {
+      const data = await regenerateExperience({
+        generationId: generation.id,
+        sourceExperienceId: experience.source_experience_id,
+        userFeedback: feedback,
+      });
+      setGeneration(data.generation);
+      setMessage('整段经历已重新生成并通过真实性检查');
     } catch (regenerateError) {
       setError(regenerateError.message || '重新生成失败');
     }
@@ -462,6 +488,15 @@ const ExperienceCustomizer = ({
                 <p className="experience-dates">
                   {experience.start_date} - {experience.end_date}
                 </p>
+                {!locked && (
+                  <button
+                    type="button"
+                    className="link-button"
+                    onClick={() => handleRegenerateExperience(experience)}
+                  >
+                    重新生成整段
+                  </button>
+                )}
                 {(experience.bullets || []).map((bullet, bulletIndex) => (
                   <div className="bullet-editor" key={bullet.claim_id}>
                     <div className="bullet-original">
@@ -534,6 +569,15 @@ const ExperienceCustomizer = ({
                     ? ` · ${experience.tech_stack.join('、')}`
                     : ''}
                 </p>
+                {!locked && (
+                  <button
+                    type="button"
+                    className="link-button"
+                    onClick={() => handleRegenerateExperience(experience)}
+                  >
+                    重新生成整段
+                  </button>
+                )}
                 {(experience.bullets || []).map((bullet, bulletIndex) => (
                   <div className="bullet-editor" key={bullet.claim_id}>
                     <div className="bullet-original">

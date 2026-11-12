@@ -19,6 +19,7 @@ jest.mock('../utils/experienceApi', () => ({
   updateExperienceGeneration: jest.fn(),
   confirmExperienceGeneration: jest.fn(),
   regenerateBullet: jest.fn(),
+  regenerateExperience: jest.fn(),
   retryAgentRun: jest.fn(),
   cancelAgentRun: jest.fn(),
 }));
@@ -182,6 +183,63 @@ describe('ExperienceCustomizer', () => {
       expect(api.listExperienceGenerations).toHaveBeenCalledWith('job_1');
     });
     expect(screen.getByText(/v0 · 已修改/)).toBeInTheDocument();
+  });
+
+  test('每段经历提供整段重新生成入口并调用接口', async () => {
+    window.prompt = jest.fn(() => '突出性能');
+    api.getAgentRunResult.mockResolvedValueOnce({
+      ...generation,
+      resultJson: {
+        ...generation.resultJson,
+        project_experiences: [
+          {
+            source_experience_id: 'prj_1',
+            project_name: '订单平台',
+            role: '核心开发',
+            start_date: '2024.01',
+            end_date: '2024.06',
+            tech_stack: ['Go'],
+            bullets: [
+              {
+                claim_id: 'claim_p1',
+                text: '开发订单平台',
+                original_text: '开发订单平台',
+                evidence_ids: ['ev_p1'],
+                verification_status: 'supported',
+              },
+            ],
+          },
+        ],
+      },
+    });
+    api.regenerateExperience.mockResolvedValue({
+      generation,
+      experience: { source_experience_id: 'exp_1' },
+    });
+    render(
+      <ExperienceCustomizer
+        jobData={jobData}
+        analysisResult={analysisResult}
+        library={library}
+        onOpenLibrary={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByText('开始生成'));
+    await waitFor(() => {
+      expect(screen.getByText('岗位匹配概览')).toBeInTheDocument();
+    });
+
+    const buttons = screen.getAllByText('重新生成整段');
+    expect(buttons).toHaveLength(2);
+    fireEvent.click(buttons[0]);
+    await waitFor(() => {
+      expect(api.regenerateExperience).toHaveBeenCalledWith({
+        generationId: 'gen_1',
+        sourceExperienceId: 'exp_1',
+        userFeedback: '突出性能',
+      });
+    });
   });
 
   test('岗位定制页展示项目建议生成入口', () => {
