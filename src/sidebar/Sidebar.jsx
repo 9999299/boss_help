@@ -263,7 +263,7 @@ const Sidebar = () => {
         <div className="analysis-result">
           <h4>岗位分析结果</h4>
 
-          <div className="analysis-section">
+          <div className="analysis-section analysis-overview">
             <h5>基本信息</h5>
             <p>
               <strong>职位：</strong>
@@ -284,7 +284,7 @@ const Sidebar = () => {
             {analysisResult.salaryRange && (
               <p>
                 <strong>薪资：</strong>
-                {analysisResult.salaryRange}
+                <span className="info-chip">{analysisResult.salaryRange}</span>
               </p>
             )}
             <div className="analysis-actions">
