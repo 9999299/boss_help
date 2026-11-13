@@ -49,13 +49,25 @@ describe('Sidebar', () => {
     expect(screen.getByText('boss_help')).toBeInTheDocument();
   });
 
+  test('标签页使用可访问的 tab 角色并标记选中项', () => {
+    render(<Sidebar />);
+    expect(screen.getByRole('tab', { name: '职位分析' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    expect(screen.getByRole('tab', { name: '经历库' })).toHaveAttribute(
+      'aria-selected',
+      'false'
+    );
+  });
+
   test('显示三个标签页', () => {
     render(<Sidebar />);
     expect(screen.getAllByText('职位分析').length).toBeGreaterThanOrEqual(1);
     expect(
-      screen.getByRole('button', { name: '简历编辑' })
+      screen.getByRole('tab', { name: '简历编辑' })
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '导出' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: '导出' })).toBeInTheDocument();
   });
 
   test('默认显示职位分析标签', () => {
@@ -65,13 +77,13 @@ describe('Sidebar', () => {
 
   test('点击简历编辑标签切换内容', () => {
     render(<Sidebar />);
-    fireEvent.click(screen.getByRole('button', { name: '简历编辑' }));
+    fireEvent.click(screen.getByRole('tab', { name: '简历编辑' }));
     expect(screen.getByText('简历编辑器')).toBeInTheDocument();
   });
 
   test('点击导出标签切换内容', () => {
     render(<Sidebar />);
-    fireEvent.click(screen.getByRole('button', { name: '导出' }));
+    fireEvent.click(screen.getByRole('tab', { name: '导出' }));
     expect(screen.getByText('导出简历')).toBeInTheDocument();
   });
 
@@ -105,7 +117,7 @@ describe('Sidebar', () => {
     });
 
     render(<Sidebar />);
-    fireEvent.click(screen.getByRole('button', { name: '简历编辑' }));
+    fireEvent.click(screen.getByRole('tab', { name: '简历编辑' }));
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('张三')).toBeInTheDocument();

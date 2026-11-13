@@ -9,6 +9,61 @@ import { loadCareerLibrary, saveCareerLibrary } from '../utils/careerLibrary';
 import { normalizeResume } from '../utils/resumeSchema';
 import '../styles/sidebar.css';
 
+const TAB_ITEMS = [
+  {
+    id: 'analyzer',
+    label: '职位分析',
+    icon: (
+      <>
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="m16 16 4 4" />
+      </>
+    ),
+  },
+  {
+    id: 'library',
+    label: '经历库',
+    icon: (
+      <>
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5z" />
+        <path d="M4 5.5v16" />
+      </>
+    ),
+  },
+  {
+    id: 'customize',
+    label: '岗位定制',
+    icon: (
+      <>
+        <path d="m12 3 1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" />
+        <path d="m18 15 .9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9z" />
+      </>
+    ),
+  },
+  {
+    id: 'editor',
+    label: '简历编辑',
+    icon: (
+      <>
+        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+        <path d="M14 3v5h5" />
+        <path d="M9 13h6M9 17h4" />
+      </>
+    ),
+  },
+  {
+    id: 'export',
+    label: '导出',
+    icon: (
+      <>
+        <path d="M12 3v11" />
+        <path d="m7.5 9.5 4.5 4.5 4.5-4.5" />
+        <path d="M4 17v3h16v-3" />
+      </>
+    ),
+  },
+];
+
 const Sidebar = () => {
   const [activeTab, setActiveTab] = useState('analyzer');
   const [analysisResult, setAnalysisResult] = useState(null);
@@ -118,40 +173,43 @@ const Sidebar = () => {
   return (
     <div className="sidebar-container">
       <div className="header">
-        <h1>boss_help</h1>
+        <div className="brand">
+          <div className="brand-mark" aria-hidden="true">
+            B
+          </div>
+          <div className="brand-text">
+            <h1>boss_help</h1>
+            <p>AI 求职助手</p>
+          </div>
+        </div>
       </div>
 
-      <div className="tabs">
-        <button
-          className={`tab ${activeTab === 'analyzer' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analyzer')}
-        >
-          职位分析
-        </button>
-        <button
-          className={`tab ${activeTab === 'library' ? 'active' : ''}`}
-          onClick={() => setActiveTab('library')}
-        >
-          经历库
-        </button>
-        <button
-          className={`tab ${activeTab === 'customize' ? 'active' : ''}`}
-          onClick={() => setActiveTab('customize')}
-        >
-          岗位定制
-        </button>
-        <button
-          className={`tab ${activeTab === 'editor' ? 'active' : ''}`}
-          onClick={() => setActiveTab('editor')}
-        >
-          简历编辑
-        </button>
-        <button
-          className={`tab ${activeTab === 'export' ? 'active' : ''}`}
-          onClick={() => setActiveTab('export')}
-        >
-          导出
-        </button>
+      <div className="tabs" role="tablist" aria-label="功能导航">
+        {TAB_ITEMS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <svg
+              className="tab-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              {tab.icon}
+            </svg>
+            <span>{tab.label}</span>
+          </button>
+        ))}
       </div>
 
       {analysisError && (
