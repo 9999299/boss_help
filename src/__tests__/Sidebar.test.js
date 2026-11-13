@@ -46,7 +46,7 @@ describe('Sidebar', () => {
 
   test('渲染侧边栏标题', () => {
     render(<Sidebar />);
-    expect(screen.getByText('AI Resume Generator')).toBeInTheDocument();
+    expect(screen.getByText('boss_help')).toBeInTheDocument();
   });
 
   test('显示三个标签页', () => {

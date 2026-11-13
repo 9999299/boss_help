@@ -1,4 +1,4 @@
-# AI Resume Generator / JobPilot
+# boss_help / JobPilot
 
 通过 AI 识别网页职位要求，并基于用户真实工作/项目经历生成岗位定制简历材料的 Chrome 扩展。
 

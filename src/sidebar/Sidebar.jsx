@@ -118,7 +118,7 @@ const Sidebar = () => {
   return (
     <div className="sidebar-container">
       <div className="header">
-        <h1>AI Resume Generator</h1>
+        <h1>boss_help</h1>
       </div>
 
       <div className="tabs">

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AI Resume Generator",
+  "name": "boss_help",
   "version": "1.0.0",
-  "description": "通过AI识别职位要求并生成针对性简历",
+  "description": "AI 分析职位要求并生成针对性简历",
   "permissions": [
     "activeTab",
     "scripting",
@@ -14,7 +14,7 @@
     "https://*.zhipin.com/*"
   ],
   "action": {
-    "default_title": "AI Resume Generator"
+    "default_title": "boss_help"
   },
   "side_panel": {
     "default_path": "sidebar.html"
